@@ -45,7 +45,7 @@ class Note {
     noteName: 'C',
     octave: 4,
     frequency: 277.18,
-    audioAssetPath: 'assets/audio/piano/C#4.mp3',
+    audioAssetPath: 'assets/audio/piano/Db4.mp3',
     isSharp: true,
   );
 
@@ -61,7 +61,7 @@ class Note {
     noteName: 'D',
     octave: 4,
     frequency: 311.13,
-    audioAssetPath: 'assets/audio/piano/D#4.mp3',
+    audioAssetPath: 'assets/audio/piano/Eb4.mp3',
     isSharp: true,
   );
 
@@ -85,7 +85,7 @@ class Note {
     noteName: 'F',
     octave: 4,
     frequency: 369.99,
-    audioAssetPath: 'assets/audio/piano/F#4.mp3',
+    audioAssetPath: 'assets/audio/piano/Gb4.mp3',
     isSharp: true,
   );
 
@@ -101,7 +101,7 @@ class Note {
     noteName: 'G',
     octave: 4,
     frequency: 415.30,
-    audioAssetPath: 'assets/audio/piano/G#4.mp3',
+    audioAssetPath: 'assets/audio/piano/Ab4.mp3',
     isSharp: true,
   );
 
@@ -117,7 +117,7 @@ class Note {
     noteName: 'A',
     octave: 4,
     frequency: 466.16,
-    audioAssetPath: 'assets/audio/piano/A#4.mp3',
+    audioAssetPath: 'assets/audio/piano/Bb4.mp3',
     isSharp: true,
   );
 
@@ -142,7 +142,7 @@ class Note {
     noteName: 'C',
     octave: 5,
     frequency: 554.37,
-    audioAssetPath: 'assets/audio/piano/C#5.mp3',
+    audioAssetPath: 'assets/audio/piano/Db5.mp3',
     isSharp: true,
   );
 
@@ -158,7 +158,7 @@ class Note {
     noteName: 'D',
     octave: 5,
     frequency: 622.25,
-    audioAssetPath: 'assets/audio/piano/D#5.mp3',
+    audioAssetPath: 'assets/audio/piano/Eb5.mp3',
     isSharp: true,
   );
 
@@ -182,7 +182,7 @@ class Note {
     noteName: 'F',
     octave: 5,
     frequency: 739.99,
-    audioAssetPath: 'assets/audio/piano/F#5.mp3',
+    audioAssetPath: 'assets/audio/piano/Gb5.mp3',
     isSharp: true,
   );
 
@@ -198,7 +198,7 @@ class Note {
     noteName: 'G',
     octave: 5,
     frequency: 830.61,
-    audioAssetPath: 'assets/audio/piano/G#5.mp3',
+    audioAssetPath: 'assets/audio/piano/Ab5.mp3',
     isSharp: true,
   );
 
@@ -214,7 +214,7 @@ class Note {
     noteName: 'A',
     octave: 5,
     frequency: 932.33,
-    audioAssetPath: 'assets/audio/piano/A#5.mp3',
+    audioAssetPath: 'assets/audio/piano/Bb5.mp3',
     isSharp: true,
   );
 

@@ -8,6 +8,7 @@ import '../features/auth/screens/splash_screen.dart';
 import '../features/auth/screens/onboarding_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/signup_screen.dart';
+import '../features/lessons/screens/lessons_list_screen.dart';
 // Auth Provider
 import '../features/auth/providers/auth_provider.dart';
 
@@ -33,6 +34,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SignupScreen(),
       ),
       GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
+      GoRoute(
+        path: '/lessons',
+        builder: (context, state) => const LessonsListScreen(),
+      ),
     ],
     redirect: (context, state) {
       final authState = ref.read(authProvider);

@@ -1,0 +1,320 @@
+{
+    "lessons": [
+        {
+            "id": "lesson_001",
+            "title": "Welcome to Piano",
+            "category": "Getting Started",
+            "description": "Learn the basics of piano and get familiar with the keyboard layout",
+            "difficulty": "beginner",
+            "estimatedDuration": 5,
+            "order": 1,
+            "isCompleted": false,
+            "isLocked": false,
+            "objectives": [
+                "Understand the piano keyboard layout",
+                "Learn about white and black keys",
+                "Identify the pattern of keys"
+            ],
+            "notesToLearn": [
+                "C4",
+                "D4",
+                "E4"
+            ],
+            "content": {
+                "theoryText": "The piano keyboard consists of white and black keys arranged in a repeating pattern. Each white key represents a natural note (C, D, E, F, G, A, B), while black keys represent sharps and flats. The pattern repeats across the keyboard, with each repetition called an octave.",
+                "demoNotes": [
+                    "C4",
+                    "D4",
+                    "E4"
+                ],
+                "practiceNotes": [
+                    "C4",
+                    "D4",
+                    "E4"
+                ],
+                "tips": [
+                    "Look for groups of 2 and 3 black keys to find your way around",
+                    "Middle C is usually near the center of the keyboard",
+                    "Take your time to get familiar with the layout"
+                ],
+                "illustrationUrl": null
+            },
+            "createdAt": "2024-01-01T00:00:00Z"
+        },
+        {
+            "id": "lesson_002",
+            "title": "Understanding the Keyboard",
+            "category": "Getting Started",
+            "description": "Master the keyboard layout and learn to identify notes quickly",
+            "difficulty": "beginner",
+            "estimatedDuration": 8,
+            "order": 2,
+            "isCompleted": false,
+            "isLocked": false,
+            "objectives": [
+                "Identify all white keys",
+                "Understand octaves",
+                "Navigate the keyboard confidently"
+            ],
+            "notesToLearn": [
+                "C4",
+                "D4",
+                "E4",
+                "F4",
+                "G4"
+            ],
+            "content": {
+                "theoryText": "The piano keyboard is organized in octaves. Each octave contains 7 white keys (C, D, E, F, G, A, B) and 5 black keys. The pattern repeats, making it easier to navigate once you understand it. Middle C (C4) is your reference point.",
+                "demoNotes": [
+                    "C4",
+                    "D4",
+                    "E4",
+                    "F4",
+                    "G4"
+                ],
+                "practiceNotes": [
+                    "C4",
+                    "E4",
+                    "G4"
+                ],
+                "tips": [
+                    "Use the groups of black keys as landmarks",
+                    "C is always to the left of the group of 2 black keys",
+                    "F is always to the left of the group of 3 black keys"
+                ],
+                "illustrationUrl": null
+            },
+            "createdAt": "2024-01-01T00:00:00Z"
+        },
+        {
+            "id": "lesson_003",
+            "title": "Your First Note: Middle C",
+            "category": "Getting Started",
+            "description": "Learn to play Middle C with proper finger position",
+            "difficulty": "beginner",
+            "estimatedDuration": 10,
+            "order": 3,
+            "isCompleted": false,
+            "isLocked": false,
+            "objectives": [
+                "Find Middle C on the keyboard",
+                "Play with correct finger position",
+                "Develop muscle memory"
+            ],
+            "notesToLearn": [
+                "C4"
+            ],
+            "content": {
+                "theoryText": "Middle C (C4) is the most important reference point on the piano. It's located near the center of the keyboard, to the left of the group of two black keys. Use your thumb (finger 1) to play it. Keep your hand relaxed and fingers curved.",
+                "demoNotes": [
+                    "C4",
+                    "C4",
+                    "C4"
+                ],
+                "practiceNotes": [
+                    "C4",
+                    "C4",
+                    "C4",
+                    "C4"
+                ],
+                "tips": [
+                    "Keep your wrist level with your hand",
+                    "Curve your fingers as if holding a ball",
+                    "Press the key firmly but gently",
+                    "Listen to the sound you create"
+                ],
+                "illustrationUrl": null
+            },
+            "createdAt": "2024-01-01T00:00:00Z"
+        },
+        {
+            "id": "lesson_004",
+            "title": "Playing D and E",
+            "category": "Getting Started",
+            "description": "Expand your range by learning D and E notes",
+            "difficulty": "beginner",
+            "estimatedDuration": 12,
+            "order": 4,
+            "isCompleted": false,
+            "isLocked": false,
+            "objectives": [
+                "Play D and E notes correctly",
+                "Use proper fingering (2 and 3)",
+                "Play simple sequences"
+            ],
+            "notesToLearn": [
+                "C4",
+                "D4",
+                "E4"
+            ],
+            "content": {
+                "theoryText": "D and E are the next two white keys after Middle C. Use finger 2 (index) for D and finger 3 (middle) for E. Practice moving smoothly between C, D, and E. This is the beginning of playing melodies!",
+                "demoNotes": [
+                    "C4",
+                    "D4",
+                    "E4",
+                    "D4",
+                    "C4"
+                ],
+                "practiceNotes": [
+                    "C4",
+                    "D4",
+                    "E4"
+                ],
+                "tips": [
+                    "Keep your fingers curved over the keys",
+                    "Move smoothly from one note to the next",
+                    "Practice slowly at first",
+                    "Maintain even volume across all notes"
+                ],
+                "illustrationUrl": null
+            },
+            "createdAt": "2024-01-01T00:00:00Z"
+        },
+        {
+            "id": "lesson_005",
+            "title": "Complete C Major Scale",
+            "category": "Basic Notes & Scales",
+            "description": "Learn the complete C Major scale - the foundation of piano playing",
+            "difficulty": "beginner",
+            "estimatedDuration": 15,
+            "order": 5,
+            "isCompleted": false,
+            "isLocked": false,
+            "objectives": [
+                "Play all notes in C Major scale",
+                "Understand scale structure",
+                "Use correct fingering for the scale"
+            ],
+            "notesToLearn": [
+                "C4",
+                "D4",
+                "E4",
+                "F4",
+                "G4",
+                "A4",
+                "B4"
+            ],
+            "content": {
+                "theoryText": "The C Major scale consists of 8 notes: C, D, E, F, G, A, B, C. It's the most fundamental scale in music and contains no sharps or flats. The fingering is: 1-2-3-1-2-3-4-5 (thumb crosses under after finger 3).",
+                "demoNotes": [
+                    "C4",
+                    "D4",
+                    "E4",
+                    "F4",
+                    "G4",
+                    "A4",
+                    "B4"
+                ],
+                "practiceNotes": [
+                    "C4",
+                    "D4",
+                    "E4",
+                    "F4",
+                    "G4"
+                ],
+                "tips": [
+                    "Start slowly and focus on evenness",
+                    "The thumb crosses under smoothly after E",
+                    "Keep your hand relaxed throughout",
+                    "Practice ascending and descending"
+                ],
+                "illustrationUrl": null
+            },
+            "createdAt": "2024-01-01T00:00:00Z"
+        },
+        {
+            "id": "lesson_006",
+            "title": "Understanding Sharps and Flats",
+            "category": "Basic Notes & Scales",
+            "description": "Learn about black keys and how they work",
+            "difficulty": "beginner",
+            "estimatedDuration": 12,
+            "order": 6,
+            "isCompleted": false,
+            "isLocked": false,
+            "objectives": [
+                "Understand sharps (#) and flats (♭)",
+                "Play black keys correctly",
+                "Learn the relationship between white and black keys"
+            ],
+            "notesToLearn": [
+                "C4",
+                "Db4",
+                "D4",
+                "Eb4",
+                "E4"
+            ],
+            "content": {
+                "theoryText": "Black keys are called sharps or flats. A sharp (#) raises a note by a half step, while a flat (♭) lowers it. For example, C# is the black key to the right of C, and D♭ is the same key (they're enharmonic equivalents). Black keys are played with fingers 2, 3, or 4.",
+                "demoNotes": [
+                    "C4",
+                    "Db4",
+                    "D4",
+                    "Eb4",
+                    "E4"
+                ],
+                "practiceNotes": [
+                    "C4",
+                    "Db4",
+                    "D4"
+                ],
+                "tips": [
+                    "Use the tips of your fingers for black keys",
+                    "Black keys are slightly higher than white keys",
+                    "Each black key has two names (sharp and flat)",
+                    "Practice moving between white and black keys smoothly"
+                ],
+                "illustrationUrl": null
+            },
+            "createdAt": "2024-01-01T00:00:00Z"
+        },
+        {
+            "id": "lesson_007",
+            "title": "F and G Notes",
+            "category": "Basic Notes & Scales",
+            "description": "Complete your first octave by learning F and G",
+            "difficulty": "beginner",
+            "estimatedDuration": 10,
+            "order": 7,
+            "isCompleted": false,
+            "isLocked": false,
+            "objectives": [
+                "Play F and G notes",
+                "Understand their position in the scale",
+                "Play simple melodies using all learned notes"
+            ],
+            "notesToLearn": [
+                "F4",
+                "G4"
+            ],
+            "content": {
+                "theoryText": "F and G complete the lower part of the scale. F is the white key to the left of the group of 3 black keys, and G is the next white key. These notes, combined with C, D, and E, allow you to play many simple melodies.",
+                "demoNotes": [
+                    "C4",
+                    "D4",
+                    "E4",
+                    "F4",
+                    "G4",
+                    "F4",
+                    "E4",
+                    "D4",
+                    "C4"
+                ],
+                "practiceNotes": [
+                    "F4",
+                    "G4",
+                    "F4"
+                ],
+                "tips": [
+                    "F is easy to find - left of 3 black keys",
+                    "Practice the sequence C-D-E-F-G",
+                    "Try playing simple melodies",
+                    "Focus on smooth transitions"
+                ],
+                "illustrationUrl": null
+            },
+            "createdAt": "2024-01-01T00:00:00Z"
+        }
+    ]
+}

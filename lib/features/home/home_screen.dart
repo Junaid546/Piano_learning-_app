@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/widgets/loading_indicator.dart';
@@ -94,7 +95,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           icon: Icons.play_circle_fill_rounded,
                           color: AppColors.primaryPurple,
                           onTap: () {
-                            // TODO: Resume last lesson
+                            context.go('/lessons');
                           },
                         ),
                         const SizedBox(height: 16),
