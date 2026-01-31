@@ -74,7 +74,7 @@ class _BlackKeyState extends State<BlackKey>
     }
     if (widget.pianoKey.isHighlighted &&
         widget.pianoKey.highlightColor != null) {
-      return widget.pianoKey.highlightColor!.withOpacity(0.6);
+      return widget.pianoKey.highlightColor!.withValues(alpha: 0.6);
     }
     return Colors.black;
   }
@@ -110,14 +110,14 @@ class _BlackKeyState extends State<BlackKey>
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                     blurRadius: 6,
                     offset: const Offset(0, 3),
                   ),
                   if (widget.pianoKey.isHighlighted)
                     BoxShadow(
                       color: (widget.pianoKey.highlightColor ?? Colors.blue)
-                          .withOpacity(0.7),
+                          .withValues(alpha: 0.7),
                       blurRadius: 12,
                       spreadRadius: 2,
                     ),
@@ -125,7 +125,10 @@ class _BlackKeyState extends State<BlackKey>
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [_getKeyColor(), _getKeyColor().withOpacity(0.8)],
+                  colors: [
+                    _getKeyColor(),
+                    _getKeyColor().withValues(alpha: 0.8),
+                  ],
                 ),
               ),
               child: widget.showLabel

@@ -70,6 +70,13 @@ class AppTextStyles {
     height: 1.5,
   );
 
+  static const TextStyle bodySmall = TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 13,
+    fontWeight: FontWeight.normal,
+    height: 1.5,
+  );
+
   // Caption: Inter (small text, 12px, regular)
   static const TextStyle labelSmall = TextStyle(
     fontFamily: 'Inter',

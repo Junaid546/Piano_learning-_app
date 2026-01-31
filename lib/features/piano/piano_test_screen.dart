@@ -159,7 +159,7 @@ class _PianoTestScreenState extends State<PianoTestScreen> {
       label: Text(note.fullName),
       selected: isHighlighted,
       onSelected: (_) => _toggleHighlight(note),
-      selectedColor: AppColors.primaryPurple.withOpacity(0.3),
+      selectedColor: AppColors.primaryPurple.withValues(alpha: 0.3),
     );
   }
 }

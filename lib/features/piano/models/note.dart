@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class Note {
   final String noteName; // C, D, E, F, G, A, B
   final int octave;
