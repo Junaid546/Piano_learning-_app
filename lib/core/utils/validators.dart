@@ -1,7 +1,7 @@
 class Validators {
   Validators._();
 
-  static String? email(String? value) {
+  static String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email is required';
     }
@@ -12,7 +12,7 @@ class Validators {
     return null;
   }
 
-  static String? password(String? value) {
+  static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password is required';
     }
@@ -22,7 +22,7 @@ class Validators {
     return null;
   }
 
-  static String? required(String? value) {
+  static String? validateRequired(String? value) {
     if (value == null || value.isEmpty) {
       return 'This field is required';
     }

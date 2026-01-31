@@ -27,6 +27,13 @@ class AppTextStyles {
   );
 
   // Title: Poppins (subtitles, 18-22px, semi-bold)
+  static const TextStyle headlineMedium = TextStyle(
+    fontFamily: 'Poppins',
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
+    height: 1.2,
+  );
+
   static const TextStyle titleLarge = TextStyle(
     fontFamily: 'Poppins',
     fontSize: 22,

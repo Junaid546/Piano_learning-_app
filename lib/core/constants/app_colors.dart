@@ -21,6 +21,7 @@ class AppColors {
   // FUNCTIONAL COLORS
   static const Color successGreen = Color(0xFF4ECDC4);
   static const Color errorRed = Color(0xFFFF6B6B);
+  static const Color error = errorRed;
   static const Color warningOrange = Color(0xFFFFA726);
   static const Color infoBlue = Color(0xFF42A5F5);
 
