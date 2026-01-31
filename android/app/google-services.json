@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1083646043976",
+    "project_id": "piano-app-acf5a",
+    "storage_bucket": "piano-app-acf5a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1083646043976:android:ad701d61562b382f00357d",
+        "android_client_info": {
+          "package_name": "com.example.pianoapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDe0EoIWEsyOe-q25d5ScrbswIqkyNT15o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
