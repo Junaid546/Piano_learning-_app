@@ -13,10 +13,11 @@ class AudioPlayerService {
   double _volume = 0.8;
 
   bool _isInitialized = false;
+  bool _isDisposed = false;
 
   /// Initialize the audio service and preload assets
   Future<void> initialize() async {
-    if (_isInitialized) return;
+    if (_isInitialized || _isDisposed) return;
 
     try {
       // Create player pool
@@ -36,6 +37,8 @@ class AudioPlayerService {
 
   /// Play a note
   Future<void> playNote(Note note) async {
+    if (_isDisposed) return;
+
     if (!_isInitialized) {
       await initialize();
     }
@@ -45,7 +48,7 @@ class AudioPlayerService {
       final playerKey = 'player_${_currentPlayerIndex % _maxPlayers}';
       final player = _playerPool[playerKey];
 
-      if (player != null) {
+      if (player != null && !_isDisposed) {
         // Stop current sound if playing
         await player.stop();
 
@@ -61,26 +64,45 @@ class AudioPlayerService {
 
   /// Stop all sounds
   Future<void> stopAll() async {
+    if (_isDisposed) return;
+
     for (final player in _playerPool.values) {
-      await player.stop();
+      try {
+        await player.stop();
+      } catch (e) {
+        debugPrint('Error stopping player: $e');
+      }
     }
   }
 
   /// Set volume (0.0 to 1.0)
   Future<void> setVolume(double volume) async {
+    if (_isDisposed) return;
+
     _volume = volume.clamp(0.0, 1.0);
     for (final player in _playerPool.values) {
-      await player.setVolume(_volume);
+      try {
+        await player.setVolume(_volume);
+      } catch (e) {
+        debugPrint('Error setting volume: $e');
+      }
     }
   }
 
   /// Get current volume
   double get volume => _volume;
 
-  /// Dispose all players
+  /// Dispose all players - should only be called on app termination
   Future<void> dispose() async {
+    if (_isDisposed) return;
+
+    _isDisposed = true;
     for (final player in _playerPool.values) {
-      await player.dispose();
+      try {
+        await player.dispose();
+      } catch (e) {
+        debugPrint('Error disposing player: $e');
+      }
     }
     _playerPool.clear();
     _isInitialized = false;
@@ -88,6 +110,8 @@ class AudioPlayerService {
 
   /// Preload a specific note (optional optimization)
   Future<void> preloadNote(Note note) async {
+    if (_isDisposed) return;
+
     try {
       final player = AudioPlayer();
       await player.setSource(AssetSource(note.audioAssetPath));

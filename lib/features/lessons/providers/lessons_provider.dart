@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../progress/providers/progress_provider.dart';
 import '../models/lesson.dart';
 
 // Provider to fetch all lessons
@@ -95,23 +96,12 @@ class LessonActions {
           .doc(lessonId)
           .update({'isCompleted': true});
 
-      // Update user progress
-      final progressRef = FirebaseFirestore.instance
-          .collection('progress')
-          .doc(user.uid);
-
-      final progressDoc = await progressRef.get();
-      if (progressDoc.exists) {
-        final data = progressDoc.data()!;
-        final lessonsCompleted = List<String>.from(
-          data['lessonsCompleted'] ?? [],
-        );
-
-        if (!lessonsCompleted.contains(lessonId)) {
-          lessonsCompleted.add(lessonId);
-          await progressRef.update({'lessonsCompleted': lessonsCompleted});
-        }
-      }
+      // Use progress actions to update progress
+      final progressActions = _ref.read(progressActionsProvider);
+      await progressActions.updateProgress(
+        lessonsCompleted: 1,
+        xpGained: 50, // XP for completing a lesson
+      );
     } catch (e) {
       // Handle error
       rethrow;

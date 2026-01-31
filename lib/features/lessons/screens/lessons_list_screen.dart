@@ -6,6 +6,7 @@ import '../../../core/widgets/loading_indicator.dart';
 import '../providers/lessons_provider.dart';
 import '../widgets/lesson_card.dart';
 import 'lesson_detail_screen.dart';
+import '../data/seed_lessons.dart';
 
 class LessonsListScreen extends ConsumerWidget {
   const LessonsListScreen({super.key});
@@ -41,6 +42,48 @@ class LessonsListScreen extends ConsumerWidget {
                     'No lessons available',
                     style: AppTextStyles.titleMedium.copyWith(
                       color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      try {
+                        await seedLessons();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('✅ Lessons seeded successfully!'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('❌ Error: $e'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    icon: const Icon(Icons.cloud_upload),
+                    label: const Text('Seed Lessons Data'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryPurple,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Press once to load initial lessons',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: Colors.grey.shade500,
                     ),
                   ),
                 ],

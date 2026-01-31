@@ -182,18 +182,21 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
             child: Stack(
               children: [
                 // White keys layer
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: whiteNotes.map((note) {
-                    return WhiteKey(
-                      pianoKey: _keys[note]!,
-                      onPressed: () => _handleKeyPress(note),
-                      onReleased: () => _handleKeyRelease(note),
-                      showLabel: widget.showLabels,
-                      width: widget.keyWidth,
-                      height: widget.keyHeight,
-                    );
-                  }).toList(),
+                SizedBox(
+                  width: totalWidth - 40, // Account for padding
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: whiteNotes.map((note) {
+                      return WhiteKey(
+                        pianoKey: _keys[note]!,
+                        onPressed: () => _handleKeyPress(note),
+                        onReleased: () => _handleKeyRelease(note),
+                        showLabel: widget.showLabels,
+                        width: widget.keyWidth,
+                        height: widget.keyHeight,
+                      );
+                    }).toList(),
+                  ),
                 ),
                 // Black keys layer (positioned absolutely)
                 ...blackNotes.map((note) {
@@ -220,8 +223,10 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
 
   @override
   void dispose() {
+    // Don't dispose AudioPlayerService - it's a singleton
+    // Just stop any playing sounds
     if (widget.enableSound) {
-      _audioService.dispose();
+      _audioService.stopAll();
     }
     super.dispose();
   }

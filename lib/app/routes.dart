@@ -4,11 +4,14 @@ import 'package:go_router/go_router.dart';
 
 // Screens
 import '../features/home/home_screen.dart';
+import '../features/home/main_scaffold.dart';
 import '../features/auth/screens/splash_screen.dart';
 import '../features/auth/screens/onboarding_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/signup_screen.dart';
 import '../features/lessons/screens/lessons_list_screen.dart';
+import '../features/practice/screens/practice_mode_screen.dart';
+import '../features/progress/screens/progress_screen.dart';
 // Auth Provider
 import '../features/auth/providers/auth_provider.dart';
 
@@ -33,10 +36,44 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/signup',
         builder: (context, state) => const SignupScreen(),
       ),
-      GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
+      // Shell route with persistent bottom navigation
+      ShellRoute(
+        builder: (context, state, child) {
+          return MainScaffold(location: state.matchedLocation, child: child);
+        },
+        routes: [
+          GoRoute(
+            path: '/',
+            pageBuilder: (context, state) =>
+                NoTransitionPage(child: const HomeScreen()),
+          ),
+          GoRoute(
+            path: '/lessons',
+            pageBuilder: (context, state) =>
+                NoTransitionPage(child: const LessonsListScreen()),
+          ),
+          GoRoute(
+            path: '/practice',
+            pageBuilder: (context, state) =>
+                NoTransitionPage(child: const PracticeModeScreen()),
+          ),
+          GoRoute(
+            path: '/progress',
+            pageBuilder: (context, state) =>
+                NoTransitionPage(child: const ProgressScreen()),
+          ),
+          GoRoute(
+            path: '/profile',
+            pageBuilder: (context, state) =>
+                NoTransitionPage(child: const ProfileScreen()),
+          ),
+        ],
+      ),
+
+      // Profile edit route (outside shell to have its own app bar)
       GoRoute(
-        path: '/lessons',
-        builder: (context, state) => const LessonsListScreen(),
+        path: '/profile/edit',
+        builder: (context, state) => const EditProfileScreen(),
       ),
     ],
     redirect: (context, state) {
