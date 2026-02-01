@@ -34,7 +34,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           .doc(firebaseUser.uid)
           .get()
           .timeout(
-            const Duration(seconds: 5),
+            const Duration(seconds: 10),
             onTimeout: () => throw Exception('Timeout'),
           );
       if (doc.exists && doc.data() != null) {
@@ -67,14 +67,38 @@ class AuthNotifier extends StateNotifier<AuthState> {
           state = AuthState.authenticated(firebaseUser, cachedUserModel);
           print('Loaded user from cache successfully');
         } else {
-          // No cached data available
-          state = AuthState.error(
-            'No cached data. Please connect to internet for first login.',
+          // No cached data available, but we have Firebase User.
+          // Fallback to temporary session using basic Firebase data.
+          print(
+            'No cache found. Falling back to temporary Firebase user data.',
           );
+
+          final tempUserModel = UserModel(
+            id: firebaseUser.uid,
+            email: firebaseUser.email ?? '',
+            displayName: firebaseUser.displayName ?? 'User',
+            profileImageUrl: firebaseUser.photoURL,
+            createdAt: DateTime.now(), // Estimate
+            lastLogin: DateTime.now(),
+          );
+
+          state = AuthState.authenticated(firebaseUser, tempUserModel);
+
+          // Try to sync again in background if network returns
+          _syncDataInBackground(firebaseUser.uid);
         }
       } catch (cacheError) {
         print('Cache fetch failed: $cacheError');
-        state = AuthState.error(cacheError.toString());
+        // Even if cache fails completely, give them access if we have the firebaseUser
+        final tempUserModel = UserModel(
+          id: firebaseUser.uid,
+          email: firebaseUser.email ?? '',
+          displayName: firebaseUser.displayName ?? 'User',
+          profileImageUrl: firebaseUser.photoURL,
+          createdAt: DateTime.now(),
+          lastLogin: DateTime.now(),
+        );
+        state = AuthState.authenticated(firebaseUser, tempUserModel);
       }
     }
   }

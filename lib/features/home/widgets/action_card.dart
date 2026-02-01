@@ -20,6 +20,8 @@ class ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -48,7 +50,9 @@ class ActionCard extends StatelessWidget {
                         Text(
                           title,
                           style: AppTextStyles.titleMedium.copyWith(
-                            color: AppColors.textPrimaryLight,
+                            color: isDarkMode
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimaryLight,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -56,7 +60,9 @@ class ActionCard extends StatelessWidget {
                         Text(
                           subtitle,
                           style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textSecondaryLight,
+                            color: isDarkMode
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondaryLight,
                           ),
                         ),
                       ],
@@ -66,7 +72,9 @@ class ActionCard extends StatelessWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: isDarkMode
+                          ? AppColors.surfaceVariantDark
+                          : Colors.white,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
