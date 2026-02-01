@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,44 +14,17 @@ class SplashScreen extends ConsumerStatefulWidget {
   ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends ConsumerState<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _opacityAnimation;
-  late Animation<Offset> _slideAnimation;
-
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    );
-
-    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
-      ),
-    );
-
-    _slideAnimation =
-        Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
-          CurvedAnimation(
-            parent: _controller,
-            curve: const Interval(0.2, 0.8, curve: Curves.easeOut),
-          ),
-        );
-
-    _controller.forward();
     _checkNavigation();
   }
 
   Future<void> _checkNavigation() async {
-    // Artificial delay for splash effect
+    // Wait for animations + artificial delay
     await Future.delayed(const Duration(seconds: 3));
 
-    // ignore: use_build_context_synchronously
     if (!mounted) return;
 
     final prefs = await SharedPreferences.getInstance();
@@ -70,12 +44,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
@@ -89,19 +57,46 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             ],
           ),
         ),
-        child: Center(
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return FadeTransition(
-                opacity: _opacityAnimation,
-                child: SlideTransition(
-                  position: _slideAnimation,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Logo Placeholder (Piano Keys)
-                      Container(
+        child: Stack(
+          children: [
+            // Floating Notes Background
+            ...List.generate(5, (index) {
+              final align = [
+                const Alignment(-0.8, -0.6),
+                const Alignment(0.8, -0.7),
+                const Alignment(-0.5, 0.4),
+                const Alignment(0.7, 0.5),
+                const Alignment(0.2, -0.2),
+              ][index];
+              return Align(
+                alignment: align,
+                child:
+                    Icon(
+                          Icons.music_note,
+                          color: Colors.white.withValues(alpha: 0.1),
+                          size: (index % 2 == 0) ? 30 : 50,
+                        )
+                        .animate(
+                          onPlay: (controller) =>
+                              controller.repeat(reverse: true),
+                        )
+                        .scale(
+                          begin: const Offset(1, 1),
+                          end: const Offset(1.2, 1.2),
+                          duration: 2.seconds,
+                          delay: (index * 300).ms,
+                        )
+                        .rotate(begin: -0.1, end: 0.1, duration: 3.seconds),
+              );
+            }),
+
+            // Main Content
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Logo Placeholder (Piano Keys)
+                  Container(
                         width: 100,
                         height: 100,
                         decoration: BoxDecoration(
@@ -113,28 +108,45 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           size: 50,
                           color: Colors.white,
                         ),
+                      )
+                      .animate()
+                      .fadeIn(duration: 800.ms, curve: Curves.easeOut)
+                      .scale(
+                        begin: const Offset(0.5, 0.5),
+                        duration: 800.ms,
+                        curve: Curves.easeOutBack,
                       ),
-                      const SizedBox(height: 24),
-                      Text(
+
+                  const SizedBox(height: 24),
+
+                  Text(
                         'Melodify',
                         style: AppTextStyles.displayLarge.copyWith(
                           color: Colors.white,
                           letterSpacing: 1.5,
                         ),
+                      )
+                      .animate()
+                      .fadeIn(delay: 400.ms, duration: 800.ms)
+                      .slideY(
+                        begin: 0.5,
+                        end: 0,
+                        duration: 800.ms,
+                        curve: Curves.easeOutQuart,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Master the Keys',
-                        style: AppTextStyles.bodyLarge.copyWith(
-                          color: Colors.white.withValues(alpha: 0.7),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
+
+                  const SizedBox(height: 8),
+
+                  Text(
+                    'Master the Keys',
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      color: Colors.white.withValues(alpha: 0.7),
+                    ),
+                  ).animate().fadeIn(delay: 800.ms, duration: 800.ms),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

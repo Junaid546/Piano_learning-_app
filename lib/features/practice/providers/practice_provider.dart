@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../progress/providers/progress_provider.dart';
+import '../../piano/providers/audio_service_provider.dart';
 import '../models/practice_challenge.dart';
 import '../models/practice_session.dart';
 import '../../../database/sync_service.dart';
@@ -92,6 +93,9 @@ class PracticeNotifier extends StateNotifier<PracticeState> {
       showFeedback: true,
     );
 
+    // Play feedback sound
+    _playFeedbackSound(isCorrect);
+
     // Hide feedback after delay and generate new challenge
     Future.delayed(const Duration(milliseconds: 800), () {
       if (mounted) {
@@ -103,6 +107,17 @@ class PracticeNotifier extends StateNotifier<PracticeState> {
         );
       }
     });
+  }
+
+  // Play feedback sound
+  void _playFeedbackSound(bool isCorrect) {
+    try {
+      final audioService = _ref.read(audioServiceProvider);
+      audioService.playFeedbackSound(isCorrect);
+    } catch (e) {
+      debugPrint('Error playing feedback sound: $e');
+      // Don't throw - feedback sounds are optional
+    }
   }
 
   int _calculateScore(int streak) {

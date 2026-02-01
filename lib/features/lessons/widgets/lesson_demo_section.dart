@@ -22,11 +22,17 @@ class _LessonDemoSectionState extends State<LessonDemoSection> {
   @override
   void initState() {
     super.initState();
+    // Initialize audio service asynchronously
     _audioService.initialize();
   }
 
   Future<void> _playDemo() async {
     if (_isPlaying) return;
+
+    // Ensure audio service is initialized before playing
+    if (!_audioService.isInitialized) {
+      await _audioService.initialize();
+    }
 
     setState(() => _isPlaying = true);
 
@@ -39,7 +45,7 @@ class _LessonDemoSectionState extends State<LessonDemoSection> {
       final note = _getNoteFromString(noteStr);
 
       if (note != null) {
-        await _audioService.playNote(note);
+        _audioService.playNote(note);
       }
 
       // Wait based on playback speed
@@ -224,7 +230,9 @@ class _LessonDemoSectionState extends State<LessonDemoSection> {
 
   @override
   void dispose() {
-    _audioService.dispose();
+    // Don't dispose AudioPlayerService - it's a singleton!
+    // Just stop any playing sounds
+    _audioService.stopAll();
     super.dispose();
   }
 }

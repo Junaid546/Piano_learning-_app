@@ -31,7 +31,8 @@ class StatsOverview extends StatelessWidget {
         _buildStatCard(
           icon: Icons.school,
           title: 'Lessons',
-          value: '$lessonsCompleted/$totalLessons',
+          value: lessonsCompleted,
+          suffix: '/$totalLessons',
           gradient: [
             AppColors.primaryPurple,
             AppColors.primaryPurple.withValues(alpha: 0.7),
@@ -40,7 +41,8 @@ class StatsOverview extends StatelessWidget {
         _buildStatCard(
           icon: Icons.access_time,
           title: 'Practice Time',
-          value: '${practiceHours}h',
+          value: practiceHours,
+          suffix: 'h',
           gradient: [
             AppColors.infoBlue,
             AppColors.infoBlue.withValues(alpha: 0.7),
@@ -49,13 +51,15 @@ class StatsOverview extends StatelessWidget {
         _buildStatCard(
           icon: Icons.local_fire_department,
           title: 'Streak',
-          value: '$currentStreak days',
+          value: currentStreak,
+          suffix: ' days',
           gradient: [Colors.orange, Colors.orange.shade700],
         ),
         _buildStatCard(
           icon: Icons.gps_fixed,
           title: 'Accuracy',
-          value: '${accuracy.toStringAsFixed(0)}%',
+          value: accuracy,
+          suffix: '%',
           gradient: [Colors.green, Colors.green.shade700],
         ),
       ],
@@ -65,7 +69,9 @@ class StatsOverview extends StatelessWidget {
   Widget _buildStatCard({
     required IconData icon,
     required String title,
-    required String value,
+    required num value,
+    String? suffix,
+    String? prefix,
     required List<Color> gradient,
   }) {
     return Container(
@@ -90,13 +96,20 @@ class StatsOverview extends StatelessWidget {
         children: [
           Icon(icon, color: Colors.white, size: 32),
           const SizedBox(height: 8),
-          Text(
-            value,
-            style: AppTextStyles.displaySmall.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 28,
-            ),
+          TweenAnimationBuilder<num>(
+            tween: Tween<num>(begin: 0, end: value),
+            duration: const Duration(milliseconds: 1500),
+            curve: Curves.easeOutQuart,
+            builder: (context, val, child) {
+              return Text(
+                '${prefix ?? ''}${val is int ? val : val.toStringAsFixed(0)}${suffix ?? ''}',
+                style: AppTextStyles.displaySmall.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 28,
+                ),
+              );
+            },
           ),
           const SizedBox(height: 4),
           Text(

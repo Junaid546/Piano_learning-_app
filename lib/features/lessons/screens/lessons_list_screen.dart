@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/widgets/loading_indicator.dart';
+import '../../../core/widgets/empty_state.dart';
+import '../../../core/utils/error_handler.dart';
 import '../providers/lessons_provider.dart';
 import '../widgets/lesson_card.dart';
 import 'lesson_detail_screen.dart';
@@ -18,7 +20,6 @@ class LessonsListScreen extends ConsumerWidget {
     final categories = ref.watch(lessonCategoriesProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: const Text('Piano Lessons'),
         backgroundColor: AppColors.primaryPurple,
@@ -28,66 +29,29 @@ class LessonsListScreen extends ConsumerWidget {
       body: lessonsAsync.when(
         data: (lessons) {
           if (lessons.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.library_books_outlined,
-                    size: 80,
-                    color: Colors.grey.shade400,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No lessons available',
-                    style: AppTextStyles.titleMedium.copyWith(
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () async {
-                      try {
-                        await seedLessons();
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('✅ Lessons seeded successfully!'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('❌ Error: $e'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      }
-                    },
-                    icon: const Icon(Icons.cloud_upload),
-                    label: const Text('Seed Lessons Data'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryPurple,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
+            return NoLessonsEmptyState(
+              onRefresh: () async {
+                try {
+                  await seedLessons();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('✅ Lessons loaded successfully!'),
+                        backgroundColor: Colors.green,
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Press once to load initial lessons',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: Colors.grey.shade500,
-                    ),
-                  ),
-                ],
-              ),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(ErrorHandler.getErrorMessage(e)),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
             );
           }
 

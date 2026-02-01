@@ -49,26 +49,29 @@ class ProfileHeader extends StatelessWidget {
                   ],
                 ),
               ),
-              child: Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                  image: profileImageUrl != null
-                      ? DecorationImage(
-                          image: NetworkImage(profileImageUrl!),
-                          fit: BoxFit.cover,
+              child: Hero(
+                tag: 'profile_avatar',
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    image: profileImageUrl != null
+                        ? DecorationImage(
+                            image: NetworkImage(profileImageUrl!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: profileImageUrl == null
+                      ? Icon(
+                          Icons.person,
+                          size: 50,
+                          color: AppColors.primaryPurple.withValues(alpha: 0.5),
                         )
                       : null,
                 ),
-                child: profileImageUrl == null
-                    ? Icon(
-                        Icons.person,
-                        size: 50,
-                        color: AppColors.primaryPurple.withValues(alpha: 0.5),
-                      )
-                    : null,
               ),
             ),
           ),

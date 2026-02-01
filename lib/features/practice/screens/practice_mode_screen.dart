@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/utils/animations.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../piano/widgets/piano_keyboard.dart';
 import '../../piano/models/note.dart';
+import '../../piano/providers/audio_service_provider.dart';
 import '../providers/practice_provider.dart';
 import '../widgets/challenge_card.dart';
 import '../widgets/score_display.dart';
@@ -77,7 +80,6 @@ class _PracticeModeScreenState extends ConsumerState<PracticeModeScreen> {
     final state = ref.watch(practiceProvider(_difficulty));
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         backgroundColor: AppColors.primaryPurple,
         foregroundColor: Colors.white,
@@ -87,6 +89,19 @@ class _PracticeModeScreenState extends ConsumerState<PracticeModeScreen> {
           onPressed: _showExitDialog,
         ),
         actions: [
+          // Sound toggle button
+          Consumer(
+            builder: (context, ref, child) {
+              final isMuted = ref.watch(audioMutedProvider);
+              return IconButton(
+                icon: Icon(isMuted ? Icons.volume_off : Icons.volume_up),
+                onPressed: () {
+                  ref.read(audioMutedProvider.notifier).toggleMute();
+                },
+                tooltip: isMuted ? 'Unmute' : 'Mute',
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
@@ -133,22 +148,27 @@ class _PracticeModeScreenState extends ConsumerState<PracticeModeScreen> {
               ),
               const SizedBox(height: 16),
               // Piano Keyboard
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade900,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(24),
-                  ),
-                ),
-                padding: const EdgeInsets.fromLTRB(8, 16, 8, 32),
-                child: PianoKeyboard(
-                  numberOfOctaves: 1,
-                  showLabels: true,
-                  onNotePlayed: _onNotePlayed,
-                  enableSound: true,
-                  keyWidth: 50,
-                  keyHeight: 180,
-                ),
+              Consumer(
+                builder: (context, ref, child) {
+                  final isMuted = ref.watch(audioMutedProvider);
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade900,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(24),
+                      ),
+                    ),
+                    padding: const EdgeInsets.fromLTRB(8, 16, 8, 32),
+                    child: PianoKeyboard(
+                      numberOfOctaves: 1,
+                      showLabels: true,
+                      onNotePlayed: _onNotePlayed,
+                      enableSound: !isMuted,
+                      keyWidth: 50,
+                      keyHeight: 180,
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -200,13 +220,23 @@ class _PracticeModeScreenState extends ConsumerState<PracticeModeScreen> {
 
   Widget _buildDifficultyButton(String difficulty, String label) {
     final isSelected = _difficulty == difficulty;
-    return GestureDetector(
-      onTap: () => _changeDifficulty(difficulty),
-      child: Container(
+    return AnimatedPressScale(
+      onPressed: () => _changeDifficulty(difficulty),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primaryPurple : Colors.grey.shade200,
           borderRadius: BorderRadius.circular(20),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primaryPurple.withValues(alpha: 0.4),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : null,
         ),
         child: Text(
           label,

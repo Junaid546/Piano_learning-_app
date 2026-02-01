@@ -111,7 +111,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     final user = ref.watch(authProvider).userModel;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: const Text('Edit Profile'),
         backgroundColor: AppColors.primaryPurple,

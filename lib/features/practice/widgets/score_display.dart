@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 
@@ -40,6 +41,7 @@ class ScoreDisplay extends StatelessWidget {
             iconColor: Colors.amber,
             label: 'Score',
             value: score.toString(),
+            valueKey: ValueKey('score_$score'), // Trigger animation on change
           ),
           _buildDivider(),
           // Streak
@@ -47,7 +49,9 @@ class ScoreDisplay extends StatelessWidget {
             icon: Icons.local_fire_department,
             iconColor: streak > 0 ? Colors.orange : Colors.grey,
             label: 'Streak',
-            value: streak > 0 ? '$streak 🔥' : '0',
+            value: streak.toString(),
+            suffix: streak > 0 ? ' 🔥' : '',
+            isStreak: true,
           ),
           _buildDivider(),
           // Accuracy
@@ -67,18 +71,54 @@ class ScoreDisplay extends StatelessWidget {
     required Color iconColor,
     required String label,
     required String value,
+    String suffix = '',
+    Key? valueKey,
+    bool isStreak = false,
   }) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: iconColor, size: 24),
+        Icon(icon, color: iconColor, size: 24)
+            .animate(
+              target:
+                  isStreak &&
+                      int.tryParse(value) != null &&
+                      int.parse(value) > 5
+                  ? 1
+                  : 0,
+            )
+            .shimmer(color: Colors.orange, duration: 1200.ms),
         const SizedBox(height: 4),
-        Text(
-          value,
-          style: AppTextStyles.titleMedium.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimaryLight,
-          ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+                  value,
+                  style: AppTextStyles.titleMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimaryLight,
+                  ),
+                )
+                .animate(key: valueKey)
+                .scale(
+                  duration: 200.ms,
+                  curve: Curves.easeOutBack,
+                ), // Bump on update
+            if (suffix.isNotEmpty)
+              Text(
+                    suffix,
+                    style: AppTextStyles.titleMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimaryLight,
+                    ),
+                  )
+                  .animate(onPlay: (c) => c.repeat(reverse: true))
+                  .scale(
+                    begin: const Offset(1, 1),
+                    end: const Offset(1.3, 1.3),
+                    duration: 800.ms,
+                  ),
+          ],
         ),
         Text(
           label,

@@ -4,33 +4,40 @@ import '../../auth/providers/auth_provider.dart';
 import '../../progress/providers/progress_provider.dart';
 import '../models/lesson.dart';
 import '../../../database/sync_service.dart';
+import '../../../core/utils/error_handler.dart';
 
 // Provider to fetch all lessons with cache-first pattern
 final lessonsProvider = StreamProvider.autoDispose<List<Lesson>>((ref) async* {
   final syncService = SyncService();
 
-  // 1. Load from cache first (instant UI)
-  final cachedLessons = await syncService.loadLessonsFromCache();
-  if (cachedLessons.isNotEmpty) {
-    yield cachedLessons;
-  }
-
-  // 2. Stream from Firebase and update cache in background
-  await for (final snapshot
-      in FirebaseFirestore.instance
-          .collection('lessons')
-          .orderBy('order')
-          .snapshots()) {
-    final lessons = snapshot.docs.map((doc) {
-      return Lesson.fromJson({...doc.data(), 'id': doc.id});
-    }).toList();
-
-    // Update cache silently in background
-    for (final lesson in lessons) {
-      syncService.updateLessonInCache(lesson);
+  try {
+    // 1. Load from cache first (instant UI)
+    final cachedLessons = await syncService.loadLessonsFromCache();
+    if (cachedLessons.isNotEmpty) {
+      yield cachedLessons;
     }
 
-    yield lessons;
+    // 2. Stream from Firebase and update cache in background
+    await for (final snapshot
+        in FirebaseFirestore.instance
+            .collection('lessons')
+            .orderBy('order')
+            .snapshots()) {
+      final lessons = snapshot.docs.map((doc) {
+        return Lesson.fromJson({...doc.data(), 'id': doc.id});
+      }).toList();
+
+      // Update cache silently in background
+      for (final lesson in lessons) {
+        syncService.updateLessonInCache(lesson);
+      }
+
+      yield lessons;
+    }
+  } catch (e) {
+    // Log error and rethrow with user-friendly message
+    print('Error loading lessons: $e');
+    throw Exception(ErrorHandler.getErrorMessage(e));
   }
 });
 
@@ -104,24 +111,28 @@ class LessonActions {
 
   Future<void> markAsCompleted(String lessonId) async {
     try {
-      final user = _ref.read(authProvider).firebaseUser;
-      if (user == null) return;
+      await ErrorHandler.retry(
+        operation: () async {
+          final user = _ref.read(authProvider).firebaseUser;
+          if (user == null) throw Exception('User not authenticated');
 
-      // Update lesson completion status
-      await FirebaseFirestore.instance
-          .collection('lessons')
-          .doc(lessonId)
-          .update({'isCompleted': true});
+          // Update lesson completion status
+          await FirebaseFirestore.instance
+              .collection('lessons')
+              .doc(lessonId)
+              .update({'isCompleted': true});
 
-      // Use progress actions to update progress
-      final progressActions = _ref.read(progressActionsProvider);
-      await progressActions.updateProgress(
-        lessonsCompleted: 1,
-        xpGained: 50, // XP for completing a lesson
+          // Use progress actions to update progress
+          final progressActions = _ref.read(progressActionsProvider);
+          await progressActions.updateProgress(
+            lessonsCompleted: 1,
+            xpGained: 50, // XP for completing a lesson
+          );
+        },
+        maxAttempts: 3,
       );
     } catch (e) {
-      // Handle error
-      rethrow;
+      throw Exception(ErrorHandler.getErrorMessage(e));
     }
   }
 

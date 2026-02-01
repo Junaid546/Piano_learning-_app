@@ -32,10 +32,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final doc = await _firestore
           .collection('users')
           .doc(firebaseUser.uid)
-          .get();
+          .get()
+          .timeout(
+            const Duration(seconds: 5),
+            onTimeout: () => throw Exception('Timeout'),
+          );
       if (doc.exists && doc.data() != null) {
         final userModel = UserModel.fromJson(doc.data()!);
         state = AuthState.authenticated(firebaseUser, userModel);
+
+        // Save user to cache for offline access
+        final syncService = SyncService();
+        await syncService.saveUserToCache(firebaseUser.uid, userModel.toJson());
 
         // Trigger background sync after successful login
         _syncDataInBackground(firebaseUser.uid);
@@ -44,7 +52,30 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = AuthState.authenticated(firebaseUser, null);
       }
     } catch (e) {
-      state = AuthState.error(e.toString());
+      // If Firestore fails (offline), try to load from SQLite cache
+      print('Firestore fetch failed, loading from cache: $e');
+
+      try {
+        final syncService = SyncService();
+        final cachedUser = await syncService.getUserFromCache(firebaseUser.uid);
+
+        if (cachedUser != null) {
+          // User found in cache, authenticate with cached data
+          final cachedUserModel = UserModel.fromJson(
+            cachedUser as Map<String, dynamic>,
+          );
+          state = AuthState.authenticated(firebaseUser, cachedUserModel);
+          print('Loaded user from cache successfully');
+        } else {
+          // No cached data available
+          state = AuthState.error(
+            'No cached data. Please connect to internet for first login.',
+          );
+        }
+      } catch (cacheError) {
+        print('Cache fetch failed: $cacheError');
+        state = AuthState.error(cacheError.toString());
+      }
     }
   }
 

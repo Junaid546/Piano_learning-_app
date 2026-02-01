@@ -23,6 +23,8 @@ class SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       children: [
         InkWell(
@@ -51,23 +53,13 @@ class SettingsTile extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
-                          fontSize: 16,
+                        style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimaryLight,
-                          fontFamily: 'Inter',
                         ),
                       ),
                       if (subtitle != null) ...[
                         const SizedBox(height: 4),
-                        Text(
-                          subtitle!,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: AppColors.textTertiary,
-                            fontFamily: 'Inter',
-                          ),
-                        ),
+                        Text(subtitle!, style: theme.textTheme.bodySmall),
                       ],
                     ],
                   ),
@@ -84,11 +76,7 @@ class SettingsTile extends StatelessWidget {
         if (showDivider)
           Padding(
             padding: const EdgeInsets.only(left: 72),
-            child: Divider(
-              height: 1,
-              thickness: 1,
-              color: AppColors.textTertiary.withValues(alpha: 0.1),
-            ),
+            child: Divider(height: 1, thickness: 1, color: theme.dividerColor),
           ),
       ],
     );
@@ -108,6 +96,9 @@ class AnimatedToggleSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: () => onChanged(!value),
       child: AnimatedContainer(
@@ -116,7 +107,9 @@ class AnimatedToggleSwitch extends StatelessWidget {
         height: 31,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: value ? AppColors.primaryPurple : Colors.grey.shade300,
+          color: value
+              ? theme.colorScheme.primary
+              : (isDark ? Colors.grey.shade700 : Colors.grey.shade300),
         ),
         child: AnimatedAlign(
           duration: const Duration(milliseconds: 200),

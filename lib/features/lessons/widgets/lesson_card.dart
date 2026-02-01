@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../../core/utils/animations.dart';
 import '../models/lesson.dart';
 
 class LessonCard extends StatelessWidget {
@@ -36,8 +37,8 @@ class LessonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: lesson.isLocked ? null : onTap,
+    return AnimatedPressScale(
+      onPressed: lesson.isLocked ? null : onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
@@ -104,13 +105,16 @@ class LessonCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          lesson.title,
-                          style: AppTextStyles.titleMedium.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: lesson.isLocked
-                                ? Colors.grey.shade600
-                                : AppColors.textPrimaryLight,
+                        Hero(
+                          tag: 'lesson_title_${lesson.id}',
+                          child: Text(
+                            lesson.title,
+                            style: AppTextStyles.titleMedium.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: lesson.isLocked
+                                  ? Colors.grey.shade600
+                                  : AppColors.textPrimaryLight,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 4),

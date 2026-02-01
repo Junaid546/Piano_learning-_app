@@ -18,5 +18,7 @@ class FirebaseService {
         options: DefaultFirebaseOptions.currentPlatform,
       );
     }
+    // Note: Firebase Auth automatically persists sessions on mobile platforms
+    // No need to call setPersistence() - it's only for web
   }
 }

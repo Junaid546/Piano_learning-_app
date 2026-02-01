@@ -65,7 +65,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             backgroundColor: AppColors.error,
           ),
         );
-        ref.read(authProvider.notifier).clearError();
+        // Clear error after current frame to avoid infinite loop
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.read(authProvider.notifier).clearError();
+        });
       }
     });
 

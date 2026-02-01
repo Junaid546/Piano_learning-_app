@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../models/achievement.dart';
@@ -37,64 +38,67 @@ class AchievementGrid extends StatelessWidget {
     final color = _getRarityColor(achievement.rarity);
 
     return GestureDetector(
-      onTap: () => onTap(achievement),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isLocked ? Colors.grey.shade200 : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isLocked ? Colors.grey.shade300 : color,
-            width: 2,
-          ),
-          boxShadow: isLocked
-              ? []
-              : [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+          onTap: () => onTap(achievement),
+          child: Container(
+            decoration: BoxDecoration(
+              color: isLocked ? Colors.grey.shade200 : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isLocked ? Colors.grey.shade300 : color,
+                width: 2,
+              ),
+              boxShadow: isLocked
+                  ? []
+                  : [
+                      BoxShadow(
+                        color: color.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  _getIconData(achievement.iconName),
+                  size: 40,
+                  color: isLocked ? Colors.grey.shade400 : color,
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    achievement.title,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: isLocked
+                          ? Colors.grey.shade500
+                          : AppColors.textPrimaryLight,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (achievement.isInProgress && !isLocked) ...[
+                  const SizedBox(height: 4),
+                  SizedBox(
+                    width: 50,
+                    child: LinearProgressIndicator(
+                      value: achievement.progressPercentage / 100,
+                      backgroundColor: Colors.grey.shade200,
+                      valueColor: AlwaysStoppedAnimation<Color>(color),
+                    ),
                   ),
                 ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              _getIconData(achievement.iconName),
-              size: 40,
-              color: isLocked ? Colors.grey.shade400 : color,
+              ],
             ),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                achievement.title,
-                style: AppTextStyles.bodySmall.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: isLocked
-                      ? Colors.grey.shade500
-                      : AppColors.textPrimaryLight,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (achievement.isInProgress && !isLocked) ...[
-              const SizedBox(height: 4),
-              SizedBox(
-                width: 50,
-                child: LinearProgressIndicator(
-                  value: achievement.progressPercentage / 100,
-                  backgroundColor: Colors.grey.shade200,
-                  valueColor: AlwaysStoppedAnimation<Color>(color),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
+          ),
+        )
+        .animate()
+        .fadeIn(duration: 400.ms)
+        .scale(begin: const Offset(0.8, 0.8), curve: Curves.easeOut);
   }
 
   Color _getRarityColor(String rarity) {

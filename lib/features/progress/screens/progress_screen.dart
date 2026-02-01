@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/widgets/loading_indicator.dart';
+import '../../../core/widgets/empty_state.dart';
+import '../../../core/utils/error_handler.dart';
 import '../providers/progress_provider.dart';
 import '../widgets/stats_overview.dart';
 import '../widgets/progress_chart.dart';
@@ -18,7 +21,6 @@ class ProgressScreen extends ConsumerWidget {
     final achievementsAsync = ref.watch(achievementsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: const Text('Your Progress'),
         backgroundColor: AppColors.primaryPurple,
@@ -30,123 +32,160 @@ class ProgressScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Stats Overview
-                StatsOverview(
-                  lessonsCompleted: progress.lessonsCompleted,
-                  totalLessons: progress.totalLessons,
-                  practiceHours: progress.totalPracticeHours,
-                  currentStreak: progress.currentStreak,
-                  accuracy: progress.accuracy,
-                ),
-                const SizedBox(height: 24),
+              children:
+                  [
+                        // Stats Overview
+                        StatsOverview(
+                          lessonsCompleted: progress.lessonsCompleted,
+                          totalLessons: progress.totalLessons,
+                          practiceHours: progress.totalPracticeHours,
+                          currentStreak: progress.currentStreak,
+                          accuracy: progress.accuracy,
+                        ),
+                        const SizedBox(height: 24),
 
-                // Progress Chart
-                if (progress.practiceDates.isNotEmpty) ...[
-                  ProgressChart(practiceDates: progress.practiceDates),
-                  const SizedBox(height: 24),
-                ],
-
-                // Level & XP
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Level ${progress.level}',
-                            style: AppTextStyles.titleLarge.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            '${progress.xp} / ${progress.xpToNextLevel} XP',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.textSecondaryLight,
-                            ),
-                          ),
+                        // Progress Chart
+                        if (progress.practiceDates.isNotEmpty) ...[
+                          ProgressChart(practiceDates: progress.practiceDates),
+                          const SizedBox(height: 24),
                         ],
-                      ),
-                      const SizedBox(height: 12),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: LinearProgressIndicator(
-                          value: progress.levelProgress,
-                          minHeight: 12,
-                          backgroundColor: Colors.grey.shade200,
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            AppColors.primaryPurple,
+
+                        // Level & XP
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Level ${progress.level}',
+                                    style: AppTextStyles.titleLarge.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ).animate().scale(
+                                    duration: 400.ms,
+                                    curve: Curves.easeOutBack,
+                                  ),
+                                  Text(
+                                    '${progress.xp} / ${progress.xpToNextLevel} XP',
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                      color: AppColors.textSecondaryLight,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: TweenAnimationBuilder<double>(
+                                  tween: Tween<double>(
+                                    begin: 0,
+                                    end: progress.levelProgress,
+                                  ),
+                                  duration: 1200.ms,
+                                  curve: Curves.easeOutCubic,
+                                  builder: (context, value, child) {
+                                    return LinearProgressIndicator(
+                                      value: value,
+                                      minHeight: 12,
+                                      backgroundColor: Colors.grey.shade200,
+                                      valueColor:
+                                          const AlwaysStoppedAnimation<Color>(
+                                            AppColors.primaryPurple,
+                                          ),
+                                    );
+                                  },
+                                ),
+                              ).animate().shimmer(
+                                duration: 1.seconds,
+                                delay: 500.ms,
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                // Achievements Section
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Achievements',
-                      style: AppTextStyles.titleLarge.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    achievementsAsync.when(
-                      data: (achievements) {
-                        final unlocked = achievements
-                            .where((a) => a.isUnlocked)
-                            .length;
-                        return Text(
-                          '$unlocked/${achievements.length}',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textSecondaryLight,
+                        // Achievements Section
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Achievements',
+                              style: AppTextStyles.titleLarge.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            achievementsAsync.when(
+                              data: (achievements) {
+                                final unlocked = achievements
+                                    .where((a) => a.isUnlocked)
+                                    .length;
+                                return Text(
+                                  '$unlocked/${achievements.length}',
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    color: AppColors.textSecondaryLight,
+                                  ),
+                                );
+                              },
+                              loading: () => const SizedBox(),
+                              error: (_, __) => const SizedBox(),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        achievementsAsync.when(
+                          data: (achievements) {
+                            if (achievements.isEmpty) {
+                              return const Padding(
+                                padding: EdgeInsets.all(32.0),
+                                child: NoAchievementsEmptyState(),
+                              );
+                            }
+                            return AchievementGrid(
+                              achievements: achievements,
+                              onTap: (achievement) {
+                                _showAchievementDetail(context, achievement);
+                              },
+                            );
+                          },
+                          loading: () =>
+                              const Center(child: LoadingIndicator()),
+                          error: (error, stack) => ErrorStateWidget(
+                            message: ErrorHandler.getErrorMessage(error),
+                            onRetry: () {
+                              ref.invalidate(achievementsProvider);
+                            },
                           ),
-                        );
-                      },
-                      loading: () => const SizedBox(),
-                      error: (_, __) => const SizedBox(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                achievementsAsync.when(
-                  data: (achievements) {
-                    return AchievementGrid(
-                      achievements: achievements,
-                      onTap: (achievement) {
-                        _showAchievementDetail(context, achievement);
-                      },
-                    );
-                  },
-                  loading: () => const Center(child: LoadingIndicator()),
-                  error: (error, stack) =>
-                      Center(child: Text('Error loading achievements: $error')),
-                ),
-              ],
+                        ),
+                      ]
+                      .animate(interval: 100.ms)
+                      .fadeIn(duration: 500.ms)
+                      .slideY(begin: 0.1, end: 0, duration: 500.ms),
             ),
           );
         },
         loading: () => const Center(child: LoadingIndicator()),
-        error: (error, stack) =>
-            Center(child: Text('Error loading progress: $error')),
+        error: (error, stack) => ErrorStateWidget(
+          message: ErrorHandler.getErrorMessage(error),
+          onRetry: () {
+            ref.invalidate(userProgressProvider);
+          },
+        ),
       ),
     );
   }

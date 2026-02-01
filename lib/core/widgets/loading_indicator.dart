@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:lottie/lottie.dart';
 import '../constants/app_colors.dart';
 
 enum LoadingIndicatorType { spinner, fullScreen, musical }
@@ -89,28 +90,13 @@ class LoadingIndicator extends StatelessWidget {
   // Placeholder for Musical Note Animation
   // In a real app, use Lottie or a complicated CustomPainter
   Widget _buildMusical(BuildContext context) {
-    return Container(
-      width: size ?? 60,
-      height: size ?? 60,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryPurple.withValues(alpha: 0.3),
-            blurRadius: 20,
-            spreadRadius: 5,
-          ),
-        ],
-      ),
-      child: const Center(
-        child: SizedBox(
-          width: 30,
-          height: 30,
-          child: CircularProgressIndicator(
-            color: AppColors.primaryPurple,
-            strokeWidth: 3,
-          ),
+    return Center(
+      child: SizedBox(
+        width: size ?? 120, // Lottie usually needs more space or can be scaled
+        height: size ?? 120,
+        child: Lottie.asset(
+          'assets/lottie/Loading_animation.json',
+          fit: BoxFit.contain,
         ),
       ),
     );

@@ -161,6 +161,10 @@ class ProgressChart extends StatelessWidget {
                   ),
                 ],
               ),
+              duration: const Duration(
+                milliseconds: 250,
+              ), // Swap animation duration
+              curve: Curves.easeInOut, // Swap animation curve
             ),
           ),
         ],

@@ -376,4 +376,61 @@ class SyncService {
       debugPrint('❌ Error updating user preferences in cache: $e');
     }
   }
+
+  // ==================== USER DATA RETRIEVAL ====================
+
+  /// Get user from cache (for offline authentication)
+  Future<dynamic> getUserFromCache(String userId) async {
+    try {
+      final result = await _dbHelper.queryOne(
+        DatabaseTables.tableUsers,
+        'id = ?',
+        [userId],
+      );
+
+      if (result != null) {
+        // Convert SQLite row to UserModel
+        return _sqliteToUserModel(result);
+      }
+      return null;
+    } catch (e) {
+      debugPrint('❌ Error getting user from cache: $e');
+      return null;
+    }
+  }
+
+  /// Convert SQLite map to UserModel
+  dynamic _sqliteToUserModel(Map<String, dynamic> row) {
+    // Return a map that can be converted to UserModel
+    return {
+      'id': row['id'],
+      'email': row['email'],
+      'displayName': row['displayName'],
+      'profileImageUrl': row['profileImageUrl'],
+      'createdAt': row['createdAt'],
+      'lastLogin': row['lastLogin'],
+    };
+  }
+
+  /// Save user to cache
+  Future<void> saveUserToCache(
+    String userId,
+    Map<String, dynamic> userData,
+  ) async {
+    try {
+      final data = _dbHelper.addSyncTimestamp({
+        'id': userId,
+        'email': userData['email'],
+        'displayName': userData['displayName'],
+        'profileImageUrl': userData['profileImageUrl'],
+        'createdAt': userData['createdAt'],
+        'lastLogin': userData['lastLogin'] ?? DateTime.now().toIso8601String(),
+      });
+
+      await _dbHelper.insert(DatabaseTables.tableUsers, data);
+      debugPrint('✅ Saved user to cache');
+    } catch (e) {
+      debugPrint('❌ Error saving user to cache: $e');
+    }
+  }
 }

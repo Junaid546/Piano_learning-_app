@@ -5,6 +5,7 @@ import '../services/audio_player_service.dart';
 import 'white_key.dart';
 import 'black_key.dart';
 
+/// A responsive piano keyboard widget that handles overflow gracefully
 class PianoKeyboard extends StatefulWidget {
   final int numberOfOctaves;
   final bool showLabels;
@@ -21,8 +22,8 @@ class PianoKeyboard extends StatefulWidget {
     this.highlightedNotes,
     this.onNotePlayed,
     this.enableSound = true,
-    this.keyWidth = 50,
-    this.keyHeight = 180,
+    this.keyWidth = 45, // Smaller default for better fit
+    this.keyHeight = 160, // Smaller default
   });
 
   @override
@@ -33,13 +34,19 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
   final AudioPlayerService _audioService = AudioPlayerService();
   final Map<Note, PianoKey> _keys = {};
   final Set<Note> _pressedNotes = {};
+  bool _audioInitialized = false;
 
   @override
   void initState() {
     super.initState();
     _initializeKeys();
-    if (widget.enableSound) {
-      _audioService.initialize();
+    _initAudio();
+  }
+
+  Future<void> _initAudio() async {
+    if (widget.enableSound && !_audioInitialized) {
+      await _audioService.initialize();
+      _audioInitialized = true;
     }
   }
 
@@ -65,6 +72,9 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
     if (oldWidget.highlightedNotes != widget.highlightedNotes) {
       _updateHighlights();
     }
+    if (oldWidget.numberOfOctaves != widget.numberOfOctaves) {
+      _initializeKeys();
+    }
   }
 
   void _updateHighlights() {
@@ -82,6 +92,8 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
   }
 
   void _handleKeyPress(Note note) {
+    if (!mounted) return;
+
     setState(() {
       _pressedNotes.add(note);
       _keys[note] = _keys[note]!.copyWith(isPressed: true);
@@ -95,6 +107,8 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
   }
 
   void _handleKeyRelease(Note note) {
+    if (!mounted) return;
+
     setState(() {
       _pressedNotes.remove(note);
       _keys[note] = _keys[note]!.copyWith(isPressed: false);
@@ -110,7 +124,7 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
   }
 
   // Calculate black key position relative to white keys
-  double _getBlackKeyOffset(Note blackNote) {
+  double _getBlackKeyOffset(Note blackNote, double actualKeyWidth) {
     final whiteNotes = _getWhiteNotes();
     final noteName = blackNote.noteName;
     final octave = blackNote.octave;
@@ -118,106 +132,121 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
     // Find the white key before this black key
     int whiteKeyIndex = 0;
     if (noteName == 'C') {
-      // C# is after C
       whiteKeyIndex = whiteNotes.indexWhere(
         (n) => n.noteName == 'C' && n.octave == octave,
       );
     } else if (noteName == 'D') {
-      // D# is after D
       whiteKeyIndex = whiteNotes.indexWhere(
         (n) => n.noteName == 'D' && n.octave == octave,
       );
     } else if (noteName == 'F') {
-      // F# is after F
       whiteKeyIndex = whiteNotes.indexWhere(
         (n) => n.noteName == 'F' && n.octave == octave,
       );
     } else if (noteName == 'G') {
-      // G# is after G
       whiteKeyIndex = whiteNotes.indexWhere(
         (n) => n.noteName == 'G' && n.octave == octave,
       );
     } else if (noteName == 'A') {
-      // A# is after A
       whiteKeyIndex = whiteNotes.indexWhere(
         (n) => n.noteName == 'A' && n.octave == octave,
       );
     }
 
+    if (whiteKeyIndex < 0) whiteKeyIndex = 0;
+
     // Position black key between white keys
-    final whiteKeyWidth = widget.keyWidth + 2; // +2 for margins
-    final blackKeyWidth = widget.keyWidth * 0.6;
-    return (whiteKeyIndex * whiteKeyWidth) +
-        (whiteKeyWidth - blackKeyWidth / 2);
+    final whiteKeyWidthWithMargin = actualKeyWidth + 2;
+    final blackKeyWidth = actualKeyWidth * 0.6;
+    return (whiteKeyIndex * whiteKeyWidthWithMargin) +
+        (whiteKeyWidthWithMargin - blackKeyWidth / 2);
   }
 
   @override
   Widget build(BuildContext context) {
     final whiteNotes = _getWhiteNotes();
     final blackNotes = _getBlackNotes();
-    final totalWidth = whiteNotes.length * (widget.keyWidth + 2);
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Colors.grey.shade900, Colors.grey.shade800],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate responsive key width based on available space
+        final availableWidth = constraints.maxWidth - 40; // Account for padding
+        final idealTotalWidth = whiteNotes.length * (widget.keyWidth + 2);
+
+        // Use scrolling if content is wider than available space
+        final needsScroll = idealTotalWidth > availableWidth;
+        final actualKeyWidth = needsScroll
+            ? widget.keyWidth
+            : (availableWidth / whiteNotes.length) - 2;
+
+        final totalWidth = whiteNotes.length * (actualKeyWidth + 2);
+        final actualKeyHeight = widget.keyHeight.clamp(120.0, 200.0);
+
+        Widget keyboardContent = Container(
           width: totalWidth,
-          height: widget.keyHeight + 40,
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Stack(
-              children: [
-                // White keys layer
-                SizedBox(
-                  width: totalWidth - 40, // Account for padding
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: whiteNotes.map((note) {
-                      return WhiteKey(
-                        pianoKey: _keys[note]!,
-                        onPressed: () => _handleKeyPress(note),
-                        onReleased: () => _handleKeyRelease(note),
-                        showLabel: widget.showLabels,
-                        width: widget.keyWidth,
-                        height: widget.keyHeight,
-                      );
-                    }).toList(),
-                  ),
-                ),
-                // Black keys layer (positioned absolutely)
-                ...blackNotes.map((note) {
-                  return Positioned(
-                    left: _getBlackKeyOffset(note),
-                    top: 0,
-                    child: BlackKey(
-                      pianoKey: _keys[note]!,
-                      onPressed: () => _handleKeyPress(note),
-                      onReleased: () => _handleKeyRelease(note),
-                      showLabel: widget.showLabels,
-                      whiteKeyWidth: widget.keyWidth,
-                      whiteKeyHeight: widget.keyHeight,
-                    ),
+          height: actualKeyHeight,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // White keys layer
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: whiteNotes.map((note) {
+                  return WhiteKey(
+                    pianoKey: _keys[note]!,
+                    onPressed: () => _handleKeyPress(note),
+                    onReleased: () => _handleKeyRelease(note),
+                    showLabel: widget.showLabels,
+                    width: actualKeyWidth,
+                    height: actualKeyHeight,
                   );
-                }),
-              ],
-            ),
+                }).toList(),
+              ),
+              // Black keys layer (positioned absolutely)
+              ...blackNotes.map((note) {
+                return Positioned(
+                  left: _getBlackKeyOffset(note, actualKeyWidth),
+                  top: 0,
+                  child: BlackKey(
+                    pianoKey: _keys[note]!,
+                    onPressed: () => _handleKeyPress(note),
+                    onReleased: () => _handleKeyRelease(note),
+                    showLabel: widget.showLabels,
+                    whiteKeyWidth: actualKeyWidth,
+                    whiteKeyHeight: actualKeyHeight,
+                  ),
+                );
+              }),
+            ],
           ),
-        ),
-      ),
+        );
+
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.grey.shade900, Colors.grey.shade800],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 20,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: needsScroll
+                ? SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: keyboardContent,
+                  )
+                : Center(child: keyboardContent),
+          ),
+        );
+      },
     );
   }
 
@@ -225,9 +254,7 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
   void dispose() {
     // Don't dispose AudioPlayerService - it's a singleton
     // Just stop any playing sounds
-    if (widget.enableSound) {
-      _audioService.stopAll();
-    }
+    _audioService.stopAll();
     super.dispose();
   }
 }

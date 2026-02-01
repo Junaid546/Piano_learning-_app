@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_colors.dart';
@@ -60,7 +61,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 color: AppColors.textSecondaryLight,
               ),
             ),
-          ),
+          ).animate().fadeIn(delay: 500.ms),
         ],
       ),
       body: SafeArea(
@@ -74,43 +75,68 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   setState(() => _currentPage = index);
                 },
                 itemBuilder: (context, index) {
+                  // Re-animate content when page changes by using unique keys if needed,
+                  // but PageView handles building/disposing so standard animate should trigger on build.
                   return Padding(
                     padding: const EdgeInsets.all(32.0),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(40),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryPurple.withValues(
-                              alpha: 0.1,
-                            ),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            _contents[index].icon,
-                            size: 100,
-                            color: AppColors.primaryPurple,
-                          ),
-                        ),
+                              padding: const EdgeInsets.all(40),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryPurple.withValues(
+                                  alpha: 0.1,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                _contents[index].icon,
+                                size: 100,
+                                color: AppColors.primaryPurple,
+                              ),
+                            )
+                            .animate(key: ValueKey('icon_$index'))
+                            .scale(duration: 500.ms, curve: Curves.easeOutBack)
+                            .fadeIn(duration: 500.ms),
+
                         const SizedBox(height: 48),
+
                         Text(
-                          _contents[index].title,
-                          textAlign: TextAlign.center,
-                          style: AppTextStyles.headlineMedium.copyWith(
-                            color: AppColors.textPrimaryLight,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                              _contents[index].title,
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.headlineMedium.copyWith(
+                                color: AppColors.textPrimaryLight,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
+                            .animate(key: ValueKey('title_$index'))
+                            .fadeIn(delay: 200.ms, duration: 500.ms)
+                            .slideY(
+                              begin: 0.2,
+                              end: 0,
+                              duration: 500.ms,
+                              curve: Curves.easeOut,
+                            ),
+
                         const SizedBox(height: 16),
+
                         Text(
-                          _contents[index].description,
-                          textAlign: TextAlign.center,
-                          style: AppTextStyles.bodyLarge.copyWith(
-                            color: AppColors.textSecondaryLight,
-                            height: 1.5,
-                          ),
-                        ),
+                              _contents[index].description,
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.bodyLarge.copyWith(
+                                color: AppColors.textSecondaryLight,
+                                height: 1.5,
+                              ),
+                            )
+                            .animate(key: ValueKey('desc_$index'))
+                            .fadeIn(delay: 400.ms, duration: 500.ms)
+                            .slideY(
+                              begin: 0.2,
+                              end: 0,
+                              duration: 500.ms,
+                              curve: Curves.easeOut,
+                            ),
                       ],
                     ),
                   );
@@ -138,24 +164,40 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ),
                       ),
                     ),
-                  ),
+                  ).animate().fadeIn(delay: 600.ms),
+
                   const SizedBox(height: 32),
+
                   CustomButton(
-                    text: _currentPage == _contents.length - 1
-                        ? 'Get Started'
-                        : 'Next',
-                    onPressed: () {
-                      if (_currentPage == _contents.length - 1) {
-                        _completeOnboarding();
-                      } else {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      }
-                    },
-                    width: double.infinity,
-                  ),
+                        text: _currentPage == _contents.length - 1
+                            ? 'Get Started'
+                            : 'Next',
+                        onPressed: () {
+                          if (_currentPage == _contents.length - 1) {
+                            _completeOnboarding();
+                          } else {
+                            _pageController.nextPage(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        },
+                        width: double.infinity,
+                      )
+                      .animate(
+                        target: _currentPage == _contents.length - 1 ? 1 : 0,
+                      )
+                      .shimmer(
+                        duration: 2.seconds,
+                        color: Colors.white.withValues(alpha: 0.5),
+                      )
+                      .then() // Wait for shimmer to finish loop? No, pulse is better separate or combined
+                      .animate(onPlay: (c) => c.repeat(reverse: true))
+                      .scaleXY(
+                        end: 1.05,
+                        duration: 1.seconds,
+                        curve: Curves.easeInOut,
+                      ), // Continuous pulse
                 ],
               ),
             ),

@@ -22,22 +22,30 @@ final userPreferencesProvider = StreamProvider<UserPreferences>((ref) async* {
   final cachedPrefs = await syncService.loadUserPreferencesFromCache(user.uid);
   if (cachedPrefs != null) {
     yield cachedPrefs;
+  } else {
+    // Yield default preferences immediately to prevent loading state
+    yield UserPreferences.defaultPreferences(user.uid);
   }
 
   // 2. Stream from Firebase and update cache in background
-  await for (final snapshot
-      in FirebaseFirestore.instance
-          .collection('user_preferences')
-          .doc(user.uid)
-          .snapshots()) {
-    final prefs = snapshot.exists
-        ? UserPreferences.fromJson(snapshot.data()!)
-        : UserPreferences.defaultPreferences(user.uid);
+  try {
+    await for (final snapshot
+        in FirebaseFirestore.instance
+            .collection('user_preferences')
+            .doc(user.uid)
+            .snapshots()) {
+      final prefs = snapshot.exists
+          ? UserPreferences.fromJson(snapshot.data()!)
+          : UserPreferences.defaultPreferences(user.uid);
 
-    // Update cache silently in background
-    syncService.updateUserPreferencesInCache(prefs);
+      // Update cache silently in background
+      syncService.updateUserPreferencesInCache(prefs);
 
-    yield prefs;
+      yield prefs;
+    }
+  } catch (e) {
+    debugPrint('Error loading preferences: $e');
+    // Keep showing cached or default preferences on error
   }
 });
 

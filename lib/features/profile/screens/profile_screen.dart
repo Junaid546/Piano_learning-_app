@@ -6,6 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../progress/providers/progress_provider.dart';
+import '../../piano/providers/audio_service_provider.dart';
 import '../providers/profile_provider.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/settings_section.dart';
@@ -40,14 +41,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final preferencesAsync = ref.watch(userPreferencesProvider);
     final progressAsync = ref.watch(userProgressProvider);
 
-    if (userAsync.userModel == null) {
+    // Use firebase user as fallback when userModel is still loading
+    final firebaseUser = userAsync.firebaseUser;
+    if (firebaseUser == null) {
       return const Scaffold(body: Center(child: LoadingIndicator()));
     }
 
-    final user = userAsync.userModel!;
+    // Create a display user - either from userModel or fallback from firebase user
+    final displayName =
+        userAsync.userModel?.displayName ?? firebaseUser.displayName ?? 'User';
+    final email = userAsync.userModel?.email ?? firebaseUser.email ?? '';
+    final profileImageUrl =
+        userAsync.userModel?.profileImageUrl ?? firebaseUser.photoURL;
+    final memberSince = userAsync.userModel?.createdAt ?? DateTime.now();
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -55,10 +63,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               // Profile Header
               ProfileHeader(
-                profileImageUrl: user.profileImageUrl,
-                displayName: user.displayName ?? 'User',
-                email: user.email,
-                memberSince: user.createdAt,
+                profileImageUrl: profileImageUrl,
+                displayName: displayName,
+                email: email,
+                memberSince: memberSince,
                 onEditTap: () {
                   // Navigate to edit profile
                   context.push('/profile/edit');
@@ -82,6 +90,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 data: (preferences) => Column(
                   children: [
                     _buildAppPreferences(preferences),
+                    _buildAudioSettings(),
                     _buildLearningSettings(preferences),
                     _buildAccountSection(),
                     _buildAboutSection(),
@@ -156,14 +165,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     IconData icon,
     Color color,
   ) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -175,22 +189,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: 8),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 18,
+            style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimaryLight,
-              fontFamily: 'Inter',
             ),
           ),
           const SizedBox(height: 2),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 11,
-              color: AppColors.textTertiary,
-              fontFamily: 'Inter',
-            ),
-          ),
+          Text(label, style: theme.textTheme.bodySmall),
         ],
       ),
     );
@@ -258,6 +262,105 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               );
             },
           ),
+          showDivider: false,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAudioSettings() {
+    return SettingsSection(
+      title: 'Audio Settings',
+      icon: Icons.music_note,
+      children: [
+        // Volume Control
+        Consumer(
+          builder: (context, ref, child) {
+            final volume = ref.watch(audioVolumeProvider);
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.volume_up,
+                          color: Colors.blue,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Volume',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimaryLight,
+                              ),
+                            ),
+                            Text(
+                              '${(volume * 100).round()}%',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondaryLight,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SliderTheme(
+                    data: SliderThemeData(
+                      activeTrackColor: AppColors.primaryPurple,
+                      inactiveTrackColor: Colors.grey.shade300,
+                      thumbColor: AppColors.primaryPurple,
+                      overlayColor: AppColors.primaryPurple.withValues(
+                        alpha: 0.2,
+                      ),
+                      trackHeight: 4,
+                    ),
+                    child: Slider(
+                      value: volume,
+                      min: 0.0,
+                      max: 1.0,
+                      divisions: 20,
+                      label: '${(volume * 100).round()}%',
+                      onChanged: (value) {
+                        ref.read(audioVolumeProvider.notifier).setVolume(value);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+        const Divider(height: 1),
+        // Test Sound Button
+        SettingsTile(
+          icon: Icons.play_circle,
+          iconColor: Colors.green,
+          title: 'Test Sound',
+          subtitle: 'Play a sample note',
+          onTap: () {
+            final audioService = ref.read(audioServiceProvider);
+            audioService.playTestSound();
+          },
           showDivider: false,
         ),
       ],

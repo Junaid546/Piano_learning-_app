@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/user_progress.dart';
@@ -20,22 +21,30 @@ final userProgressProvider = StreamProvider<UserProgress>((ref) async* {
   final cachedProgress = await syncService.loadUserProgressFromCache(user.uid);
   if (cachedProgress != null) {
     yield cachedProgress;
+  } else {
+    // Yield default progress immediately to prevent loading state
+    yield UserProgress(userId: user.uid);
   }
 
   // 2. Stream from Firebase and update cache in background
-  await for (final snapshot
-      in FirebaseFirestore.instance
-          .collection('progress')
-          .doc(user.uid)
-          .snapshots()) {
-    final progress = snapshot.exists
-        ? UserProgress.fromJson(snapshot.data()!)
-        : UserProgress(userId: user.uid);
+  try {
+    await for (final snapshot
+        in FirebaseFirestore.instance
+            .collection('progress')
+            .doc(user.uid)
+            .snapshots()) {
+      final progress = snapshot.exists
+          ? UserProgress.fromJson(snapshot.data()!)
+          : UserProgress(userId: user.uid);
 
-    // Update cache silently in background
-    syncService.updateUserProgressInCache(progress);
+      // Update cache silently in background
+      syncService.updateUserProgressInCache(progress);
 
-    yield progress;
+      yield progress;
+    }
+  } catch (e) {
+    debugPrint('Error loading progress: $e');
+    // Keep showing cached or default progress on error
   }
 });
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/piano_key.dart';
+import '../../../core/constants/app_colors.dart';
 
 class WhiteKey extends StatefulWidget {
   final PianoKey pianoKey;
@@ -112,12 +113,15 @@ class _WhiteKeyState extends State<WhiteKey>
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
-                  if (widget.pianoKey.isHighlighted)
+                  // Glow effect on press or highlight
+                  if (widget.pianoKey.isHighlighted || _isPressed)
                     BoxShadow(
-                      color: (widget.pianoKey.highlightColor ?? Colors.blue)
-                          .withValues(alpha: 0.5),
-                      blurRadius: 12,
-                      spreadRadius: 2,
+                      color:
+                          (widget.pianoKey.highlightColor ??
+                                  AppColors.primaryPurple)
+                              .withValues(alpha: _isPressed ? 0.6 : 0.4),
+                      blurRadius: _isPressed ? 16 : 8,
+                      spreadRadius: _isPressed ? 2 : 0,
                     ),
                 ],
                 gradient: LinearGradient(
