@@ -259,7 +259,7 @@ class _PracticeResultsScreenState extends State<PracticeResultsScreen>
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    side: BorderSide(color: AppColors.primaryPurple),
+                    side: const BorderSide(color: AppColors.primaryPurple),
                   ),
                   child: const Text(
                     'Back to Home',

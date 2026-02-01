@@ -172,7 +172,7 @@ class _PracticeModeScreenState extends ConsumerState<PracticeModeScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('Paused', style: AppTextStyles.displaySmall),
+                        const Text('Paused', style: AppTextStyles.displaySmall),
                         const SizedBox(height: 24),
                         ElevatedButton(
                           onPressed: () {

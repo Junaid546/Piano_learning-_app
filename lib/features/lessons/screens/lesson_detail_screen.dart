@@ -55,17 +55,17 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
+        title: const Row(
           children: [
             Icon(Icons.celebration, color: Colors.amber, size: 32),
-            const SizedBox(width: 12),
-            const Text('Great Job!'),
+            SizedBox(width: 12),
+            Text('Great Job!'),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            const Text(
               'You\'ve completed the practice section!',
               style: AppTextStyles.bodyMedium,
             ),
@@ -196,7 +196,7 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.check_circle,
                             color: AppColors.primaryPurple,
                             size: 20,
@@ -256,7 +256,7 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.piano,
                           color: AppColors.primaryPurple,
                           size: 24,

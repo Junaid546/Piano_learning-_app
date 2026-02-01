@@ -5,6 +5,7 @@ import '../constants/app_text_styles.dart';
 class CustomTextField extends StatefulWidget {
   final String label;
   final String? hint;
+  final String? initialValue;
   final TextEditingController? controller;
   final String? Function(String?)? validator;
   final bool obscureText;
@@ -13,11 +14,14 @@ class CustomTextField extends StatefulWidget {
   final Widget? suffixIcon;
   final bool isPassword;
   final ValueChanged<String>? onChanged;
+  final bool enabled;
+  final int maxLines;
 
   const CustomTextField({
     super.key,
     required this.label,
     this.hint,
+    this.initialValue,
     this.controller,
     this.validator,
     this.obscureText = false,
@@ -26,6 +30,8 @@ class CustomTextField extends StatefulWidget {
     this.suffixIcon,
     this.isPassword = false,
     this.onChanged,
+    this.enabled = true,
+    this.maxLines = 1,
   });
 
   @override
@@ -51,10 +57,13 @@ class _CustomTextFieldState extends State<CustomTextField> {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: widget.controller,
+      initialValue: widget.initialValue,
       validator: widget.validator,
       obscureText: widget.isPassword ? _obscureText : widget.obscureText,
       keyboardType: widget.keyboardType,
       onChanged: widget.onChanged,
+      enabled: widget.enabled,
+      maxLines: widget.maxLines,
       style: AppTextStyles.bodyLarge.copyWith(
         color: Theme.of(context).colorScheme.onSurface,
       ),

@@ -103,7 +103,7 @@ class LoadingIndicator extends StatelessWidget {
           ),
         ],
       ),
-      child: Center(
+      child: const Center(
         child: SizedBox(
           width: 30,
           height: 30,

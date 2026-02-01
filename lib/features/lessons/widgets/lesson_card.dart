@@ -84,7 +84,11 @@ class LessonCard extends StatelessWidget {
                     ),
                     child: Center(
                       child: lesson.isLocked
-                          ? Icon(Icons.lock, color: Colors.white, size: 24)
+                          ? const Icon(
+                              Icons.lock,
+                              color: Colors.white,
+                              size: 24,
+                            )
                           : Text(
                               '${lesson.order}',
                               style: AppTextStyles.titleMedium.copyWith(

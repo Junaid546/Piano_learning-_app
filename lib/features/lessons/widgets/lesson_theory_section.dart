@@ -80,7 +80,11 @@ class _LessonTheorySectionState extends State<LessonTheorySection>
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Icon(Icons.school, color: AppColors.primaryPurple, size: 24),
+                  const Icon(
+                    Icons.school,
+                    color: AppColors.primaryPurple,
+                    size: 24,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -93,7 +97,7 @@ class _LessonTheorySectionState extends State<LessonTheorySection>
                   ),
                   RotationTransition(
                     turns: _rotationAnimation,
-                    child: Icon(
+                    child: const Icon(
                       Icons.keyboard_arrow_down,
                       color: AppColors.primaryPurple,
                     ),

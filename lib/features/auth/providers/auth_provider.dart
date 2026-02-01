@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/user_model.dart';
 import '../models/auth_state.dart';
+import '../../../database/sync_service.dart';
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier();
@@ -35,6 +36,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       if (doc.exists && doc.data() != null) {
         final userModel = UserModel.fromJson(doc.data()!);
         state = AuthState.authenticated(firebaseUser, userModel);
+
+        // Trigger background sync after successful login
+        _syncDataInBackground(firebaseUser.uid);
       } else {
         // User authenticated but no profile yet (edge case)
         state = AuthState.authenticated(firebaseUser, null);
@@ -42,6 +46,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       state = AuthState.error(e.toString());
     }
+  }
+
+  /// Sync data from Firebase to SQLite cache in background
+  void _syncDataInBackground(String userId) {
+    final syncService = SyncService();
+    // Run sync in background without blocking UI
+    Future.microtask(() => syncService.syncAllData(userId));
   }
 
   Future<void> login(String email, String password) async {
@@ -117,6 +128,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> logout() async {
     state = state.copyWith(isLoading: true);
+
+    // Clear SQLite cache on logout
+    final syncService = SyncService();
+    await syncService.clearCache();
+
     await _auth.signOut();
     // Listener will update state
   }

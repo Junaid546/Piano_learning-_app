@@ -130,10 +130,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   hint: 'Repeat your password',
                   controller: _confirmPasswordController,
                   validator: (val) {
-                    if (val == null || val.isEmpty)
+                    if (val == null || val.isEmpty) {
                       return 'Please confirm password';
-                    if (val != _passwordController.text)
+                    }
+                    if (val != _passwordController.text) {
                       return 'Passwords do not match';
+                    }
                     return null;
                   },
                   isPassword: true,

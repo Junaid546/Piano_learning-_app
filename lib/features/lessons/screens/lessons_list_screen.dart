@@ -98,7 +98,7 @@ class LessonsListScreen extends ConsumerWidget {
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       colors: [AppColors.primaryPurple, AppColors.infoBlue],
                     ),
@@ -181,7 +181,10 @@ class LessonsListScreen extends ConsumerWidget {
             children: [
               Icon(Icons.error_outline, size: 60, color: Colors.red.shade300),
               const SizedBox(height: 16),
-              Text('Error loading lessons', style: AppTextStyles.titleMedium),
+              const Text(
+                'Error loading lessons',
+                style: AppTextStyles.titleMedium,
+              ),
               const SizedBox(height: 8),
               Text(
                 error.toString(),

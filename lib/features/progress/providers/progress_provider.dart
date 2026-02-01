@@ -4,24 +4,39 @@ import '../../auth/providers/auth_provider.dart';
 import '../models/user_progress.dart';
 import '../models/achievement.dart';
 import '../data/achievements_data.dart';
+import '../../../database/sync_service.dart';
 
-// Progress provider
-final userProgressProvider = StreamProvider<UserProgress>((ref) {
+// Progress provider with cache-first pattern
+final userProgressProvider = StreamProvider<UserProgress>((ref) async* {
   final user = ref.watch(authProvider).firebaseUser;
   if (user == null) {
-    return Stream.value(UserProgress(userId: ''));
+    yield UserProgress(userId: '');
+    return;
   }
 
-  return FirebaseFirestore.instance
-      .collection('progress')
-      .doc(user.uid)
-      .snapshots()
-      .map((snapshot) {
-        if (!snapshot.exists) {
-          return UserProgress(userId: user.uid);
-        }
-        return UserProgress.fromJson(snapshot.data()!);
-      });
+  final syncService = SyncService();
+
+  // 1. Load from cache first (instant UI)
+  final cachedProgress = await syncService.loadUserProgressFromCache(user.uid);
+  if (cachedProgress != null) {
+    yield cachedProgress;
+  }
+
+  // 2. Stream from Firebase and update cache in background
+  await for (final snapshot
+      in FirebaseFirestore.instance
+          .collection('progress')
+          .doc(user.uid)
+          .snapshots()) {
+    final progress = snapshot.exists
+        ? UserProgress.fromJson(snapshot.data()!)
+        : UserProgress(userId: user.uid);
+
+    // Update cache silently in background
+    syncService.updateUserProgressInCache(progress);
+
+    yield progress;
+  }
 });
 
 // Achievements provider with progress

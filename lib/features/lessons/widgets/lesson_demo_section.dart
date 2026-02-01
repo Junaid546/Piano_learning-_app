@@ -114,7 +114,7 @@ class _LessonDemoSectionState extends State<LessonDemoSection> {
         children: [
           Row(
             children: [
-              Icon(Icons.headphones, color: AppColors.infoBlue, size: 24),
+              const Icon(Icons.headphones, color: AppColors.infoBlue, size: 24),
               const SizedBox(width: 12),
               Text(
                 'Watch & Listen',

@@ -3,27 +3,42 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../auth/models/user_model.dart';
+
 import '../../auth/providers/auth_provider.dart';
 import '../models/user_preferences.dart';
+import '../../../database/sync_service.dart';
 
-// Stream provider for user preferences
-final userPreferencesProvider = StreamProvider<UserPreferences>((ref) {
+// Stream provider for user preferences with cache-first pattern
+final userPreferencesProvider = StreamProvider<UserPreferences>((ref) async* {
   final user = ref.watch(authProvider).firebaseUser;
   if (user == null) {
-    return Stream.value(UserPreferences.defaultPreferences(''));
+    yield UserPreferences.defaultPreferences('');
+    return;
   }
 
-  return FirebaseFirestore.instance
-      .collection('user_preferences')
-      .doc(user.uid)
-      .snapshots()
-      .map((snapshot) {
-        if (!snapshot.exists) {
-          return UserPreferences.defaultPreferences(user.uid);
-        }
-        return UserPreferences.fromJson(snapshot.data()!);
-      });
+  final syncService = SyncService();
+
+  // 1. Load from cache first (instant UI)
+  final cachedPrefs = await syncService.loadUserPreferencesFromCache(user.uid);
+  if (cachedPrefs != null) {
+    yield cachedPrefs;
+  }
+
+  // 2. Stream from Firebase and update cache in background
+  await for (final snapshot
+      in FirebaseFirestore.instance
+          .collection('user_preferences')
+          .doc(user.uid)
+          .snapshots()) {
+    final prefs = snapshot.exists
+        ? UserPreferences.fromJson(snapshot.data()!)
+        : UserPreferences.defaultPreferences(user.uid);
+
+    // Update cache silently in background
+    syncService.updateUserPreferencesInCache(prefs);
+
+    yield prefs;
+  }
 });
 
 // Provider for profile actions
@@ -115,7 +130,6 @@ class ProfileActions {
     String newPassword,
   ) async {
     try {
-      final authActions = _ref.read(authActionsProvider);
       // This would require re-authentication
       // Implementation depends on your auth setup
       // For now, we'll leave this as a placeholder
@@ -151,8 +165,8 @@ class ProfileActions {
       await user.delete();
 
       // Sign out
-      final authActions = _ref.read(authActionsProvider);
-      await authActions.signOut();
+      final authNotifier = _ref.read(authProvider.notifier);
+      await authNotifier.logout();
     } catch (e) {
       debugPrint('Error deleting account: $e');
       rethrow;

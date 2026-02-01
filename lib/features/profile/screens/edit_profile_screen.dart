@@ -35,8 +35,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   void _loadUserData() {
     final user = ref.read(authProvider).userModel;
-    if (user != null) {
-      _nameController.text = user.displayName ?? '';
+    final displayName = user?.displayName;
+    if (displayName != null) {
+      _nameController.text = displayName;
       // Load other fields from Firestore if available
     }
   }
@@ -189,7 +190,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     CustomTextField(
                       controller: _nameController,
                       label: 'Display Name',
-                      prefixIcon: Icons.person,
+                      prefixIcon: const Icon(Icons.person),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Please enter your name';
@@ -204,7 +205,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     CustomTextField(
                       initialValue: user?.email ?? '',
                       label: 'Email',
-                      prefixIcon: Icons.email,
+                      prefixIcon: const Icon(Icons.email),
                       enabled: false,
                     ),
 
@@ -214,7 +215,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     CustomTextField(
                       controller: _bioController,
                       label: 'Bio (Optional)',
-                      prefixIcon: Icons.info,
+                      prefixIcon: const Icon(Icons.info),
                       maxLines: 3,
                     ),
 
@@ -224,14 +225,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     CustomTextField(
                       controller: _learningGoalController,
                       label: 'Learning Goal (Optional)',
-                      prefixIcon: Icons.flag,
+                      prefixIcon: const Icon(Icons.flag),
                     ),
 
                     const SizedBox(height: 16),
 
                     // Skill Level
                     DropdownButtonFormField<String>(
-                      value: _skillLevel,
+                      initialValue: _skillLevel,
                       decoration: InputDecoration(
                         labelText: 'Skill Level',
                         prefixIcon: const Icon(Icons.star),

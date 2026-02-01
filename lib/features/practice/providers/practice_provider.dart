@@ -5,6 +5,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../../progress/providers/progress_provider.dart';
 import '../models/practice_challenge.dart';
 import '../models/practice_session.dart';
+import '../../../database/sync_service.dart';
 
 // Practice state
 class PracticeState {
@@ -154,7 +155,13 @@ class PracticeNotifier extends StateNotifier<PracticeState> {
       final user = _ref.read(authProvider).firebaseUser;
       if (user == null) return;
 
-      // Save practice session
+      // Import sync service
+      final syncService = SyncService();
+
+      // 1. Save to cache first (instant, works offline)
+      await syncService.savePracticeSessionToCache(session, user.uid);
+
+      // 2. Save practice session to Firebase
       await FirebaseFirestore.instance
           .collection('practice_sessions')
           .doc(session.sessionId)

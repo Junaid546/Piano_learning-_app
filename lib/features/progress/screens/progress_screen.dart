@@ -88,7 +88,7 @@ class ProgressScreen extends ConsumerWidget {
                           value: progress.levelProgress,
                           minHeight: 12,
                           backgroundColor: Colors.grey.shade200,
-                          valueColor: AlwaysStoppedAnimation<Color>(
+                          valueColor: const AlwaysStoppedAnimation<Color>(
                             AppColors.primaryPurple,
                           ),
                         ),

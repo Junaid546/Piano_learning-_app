@@ -3,18 +3,35 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../progress/providers/progress_provider.dart';
 import '../models/lesson.dart';
+import '../../../database/sync_service.dart';
 
-// Provider to fetch all lessons
-final lessonsProvider = StreamProvider.autoDispose<List<Lesson>>((ref) {
-  return FirebaseFirestore.instance
-      .collection('lessons')
-      .orderBy('order')
-      .snapshots()
-      .map((snapshot) {
-        return snapshot.docs.map((doc) {
-          return Lesson.fromJson({...doc.data(), 'id': doc.id});
-        }).toList();
-      });
+// Provider to fetch all lessons with cache-first pattern
+final lessonsProvider = StreamProvider.autoDispose<List<Lesson>>((ref) async* {
+  final syncService = SyncService();
+
+  // 1. Load from cache first (instant UI)
+  final cachedLessons = await syncService.loadLessonsFromCache();
+  if (cachedLessons.isNotEmpty) {
+    yield cachedLessons;
+  }
+
+  // 2. Stream from Firebase and update cache in background
+  await for (final snapshot
+      in FirebaseFirestore.instance
+          .collection('lessons')
+          .orderBy('order')
+          .snapshots()) {
+    final lessons = snapshot.docs.map((doc) {
+      return Lesson.fromJson({...doc.data(), 'id': doc.id});
+    }).toList();
+
+    // Update cache silently in background
+    for (final lesson in lessons) {
+      syncService.updateLessonInCache(lesson);
+    }
+
+    yield lessons;
+  }
 });
 
 // Provider to filter lessons by category
