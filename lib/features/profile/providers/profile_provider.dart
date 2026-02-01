@@ -136,8 +136,9 @@ class ProfileActions {
       final user = _ref.read(authProvider).firebaseUser;
       if (user == null) throw Exception('User not logged in');
 
-      if (!imageFile.existsSync()) {
-        throw Exception('Image file does not exist');
+      // 1. Verify local file exists
+      if (!await imageFile.exists()) {
+        throw Exception('Image file does not exist at path: ${imageFile.path}');
       }
 
       // Create a reference to the storage location
@@ -146,32 +147,61 @@ class ProfileActions {
           .child('profile_pictures')
           .child('${user.uid}.jpg');
 
-      // Upload the file
-      // Set metadata to ensure correct content type
+      // 2. Upload the file using putFile
       final metadata = SettableMetadata(contentType: 'image/jpeg');
-      final uploadTask = await storageRef.putFile(imageFile, metadata);
+      final uploadTask = storageRef.putFile(imageFile, metadata);
 
-      // Get the download URL
-      final downloadUrl = await uploadTask.ref.getDownloadURL();
+      // 3. Wait for the upload to complete
+      final snapshot = await uploadTask;
 
-      // Update user document with new profile image URL in Firestore
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).update(
-        {'profileImageUrl': downloadUrl},
-      );
+      // 4. Strict success check BEFORE getting download URL
+      if (snapshot.state == TaskState.success) {
+        // Retry logic for getDownloadURL to handle potential consistency race conditions
+        String? downloadUrl;
+        int retries = 3;
+        while (retries > 0) {
+          try {
+            downloadUrl = await snapshot.ref.getDownloadURL();
+            break; // Success!
+          } catch (e) {
+            if (retries == 1) rethrow; // If last retry, fail
+            debugPrint(
+              'getDownloadURL failed, retrying... ($retries left). Error: $e',
+            );
+            await Future.delayed(const Duration(milliseconds: 1000));
+            retries--;
+          }
+        }
 
-      // Update Cache
-      final currentUserData = await _syncService.getUserFromCache(user.uid);
-      if (currentUserData != null) {
-        currentUserData['profileImageUrl'] = downloadUrl;
-        await _syncService.saveUserToCache(user.uid, currentUserData);
+        if (downloadUrl == null)
+          throw Exception('Failed to get download URL after retries');
+
+        debugPrint('Upload successful. Download URL: $downloadUrl');
+
+        // Update user document with new profile image URL in Firestore
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .update({'profileImageUrl': downloadUrl});
+
+        // Update Cache
+        final currentUserData = await _syncService.getUserFromCache(user.uid);
+        if (currentUserData != null) {
+          currentUserData['profileImageUrl'] = downloadUrl;
+          await _syncService.saveUserToCache(user.uid, currentUserData);
+        }
+
+        return downloadUrl;
+      } else {
+        throw Exception(
+          'Upload failed. State: ${snapshot.state}, Bytes: ${snapshot.bytesTransferred}',
+        );
       }
-
-      return downloadUrl;
     } catch (e) {
       debugPrint('Error uploading profile picture: $e');
       if (e is FirebaseException) {
         debugPrint('Firebase Storage Error: ${e.code} - ${e.message}');
-        throw Exception('Upload failed: ${e.message}');
+        throw Exception('Upload failed: ${e.message} (Code: ${e.code})');
       }
       rethrow;
     }
