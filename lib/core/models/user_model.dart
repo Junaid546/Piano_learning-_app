@@ -5,6 +5,7 @@ class UserModel {
   final DateTime createdAt;
   final DateTime lastLogin;
   final String? profileImageUrl;
+  final String? bio;
 
   UserModel({
     required this.id,
@@ -13,6 +14,7 @@ class UserModel {
     required this.createdAt,
     required this.lastLogin,
     this.profileImageUrl,
+    this.bio,
   });
 
   Map<String, dynamic> toJson() {
@@ -23,6 +25,7 @@ class UserModel {
       'createdAt': createdAt.toIso8601String(),
       'lastLogin': lastLogin.toIso8601String(),
       'profileImageUrl': profileImageUrl,
+      'bio': bio,
     };
   }
 
@@ -34,6 +37,7 @@ class UserModel {
       createdAt: DateTime.parse(json['createdAt'] as String),
       lastLogin: DateTime.parse(json['lastLogin'] as String),
       profileImageUrl: json['profileImageUrl'] as String?,
+      bio: json['bio'] as String?,
     );
   }
 
@@ -44,6 +48,7 @@ class UserModel {
     DateTime? createdAt,
     DateTime? lastLogin,
     String? profileImageUrl,
+    String? bio,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -52,6 +57,7 @@ class UserModel {
       createdAt: createdAt ?? this.createdAt,
       lastLogin: lastLogin ?? this.lastLogin,
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      bio: bio ?? this.bio,
     );
   }
 }

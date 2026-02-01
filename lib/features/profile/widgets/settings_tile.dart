@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 
-class SettingsTile extends StatelessWidget {
+class SettingsTile extends StatefulWidget {
   final IconData icon;
   final Color iconColor;
   final String title;
@@ -22,63 +22,138 @@ class SettingsTile extends StatelessWidget {
   });
 
   @override
+  State<SettingsTile> createState() => _SettingsTileState();
+}
+
+class _SettingsTileState extends State<SettingsTile>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.98,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    return Column(
-      children: [
-        InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
+    return GestureDetector(
+      onTapDown: (_) => _controller.forward(),
+      onTapUp: (_) => _controller.reverse(),
+      onTapCancel: () => _controller.reverse(),
+      onTap: widget.onTap,
+      child: AnimatedBuilder(
+        animation: _scaleAnimation,
+        builder: (context, child) => Transform.scale(
+          scale: _scaleAnimation.value,
+          child: Container(
+            color: Colors.transparent, // Hit test behavior
+            child: Column(
               children: [
-                // Icon with colored background
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
                   ),
-                  child: Icon(icon, color: iconColor, size: 22),
-                ),
-                const SizedBox(width: 16),
-
-                // Title and subtitle
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Text(
-                        title,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+                      // Icon with colored background
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: widget.iconColor.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Icon(
+                          widget.icon,
+                          color: widget.iconColor,
+                          size: 22,
                         ),
                       ),
-                      if (subtitle != null) ...[
-                        const SizedBox(height: 4),
-                        Text(subtitle!, style: theme.textTheme.bodySmall),
+                      const SizedBox(width: 16),
+
+                      // Title and subtitle
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.title,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                                color: isDark
+                                    ? Colors.white
+                                    : AppColors.textPrimaryLight,
+                              ),
+                            ),
+                            if (widget.subtitle != null) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                widget.subtitle!,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: isDark
+                                      ? Colors.white60
+                                      : AppColors.textTertiaryLight,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+
+                      // Trailing widget
+                      if (widget.trailing != null) ...[
+                        const SizedBox(width: 12),
+                        widget.trailing!,
+                      ] else if (widget.onTap != null) ...[
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          color: isDark
+                              ? Colors.white30
+                              : AppColors.textTertiaryLight.withOpacity(0.5),
+                          size: 20,
+                        ),
                       ],
                     ],
                   ),
                 ),
 
-                // Trailing widget
-                if (trailing != null) ...[const SizedBox(width: 12), trailing!],
+                // Divider
+                if (widget.showDivider)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 80, right: 20),
+                    child: Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: isDark
+                          ? Colors.white10
+                          : Colors.black.withOpacity(0.04),
+                    ),
+                  ),
               ],
             ),
           ),
         ),
-
-        // Divider
-        if (showDivider)
-          Padding(
-            padding: const EdgeInsets.only(left: 72),
-            child: Divider(height: 1, thickness: 1, color: theme.dividerColor),
-          ),
-      ],
+      ),
     );
   }
 }
@@ -96,31 +171,37 @@ class AnimatedToggleSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return GestureDetector(
       onTap: () => onChanged(!value),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: 51,
-        height: 31,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutBack,
+        width: 52,
+        height: 32,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: value
-              ? theme.colorScheme.primary
-              : (isDark ? Colors.grey.shade700 : Colors.grey.shade300),
+              ? AppColors.primaryPurple
+              : AppColors.textTertiaryLight.withOpacity(0.3),
         ),
         child: AnimatedAlign(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutBack,
           alignment: value ? Alignment.centerRight : Alignment.centerLeft,
           child: Container(
-            width: 27,
-            height: 27,
-            margin: const EdgeInsets.all(2),
+            width: 24,
+            height: 24,
+            margin: const EdgeInsets.all(4),
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
+              ],
             ),
           ),
         ),

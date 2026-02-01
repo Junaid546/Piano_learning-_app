@@ -3,7 +3,7 @@
 class DatabaseTables {
   // Database name and version
   static const String databaseName = 'pianoapp_cache.db';
-  static const int databaseVersion = 1;
+  static const int databaseVersion = 2;
 
   // Table names
   static const String tableUsers = 'users';
@@ -23,6 +23,7 @@ class DatabaseTables {
       createdAt TEXT NOT NULL,
       lastLogin TEXT NOT NULL,
       profileImageUrl TEXT,
+      bio TEXT,
       lastSyncedAt TEXT NOT NULL
     )
   ''';

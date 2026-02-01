@@ -44,6 +44,7 @@ class MainScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: child,
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: _currentIndex,

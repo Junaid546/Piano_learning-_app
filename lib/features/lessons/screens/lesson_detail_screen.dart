@@ -5,6 +5,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lottie/lottie.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../../core/widgets/glass_container.dart';
+import '../../../core/widgets/animated_background.dart';
 import '../models/lesson.dart';
 import '../providers/lessons_provider.dart';
 import '../widgets/lesson_theory_section.dart';
@@ -90,7 +92,7 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'You\'ve completed the practice section!',
               style: AppTextStyles.bodyMedium,
             ).animate().fadeIn(delay: 200.ms),
@@ -162,302 +164,312 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
           IconButton(icon: const Icon(Icons.bookmark_border), onPressed: () {}),
         ],
       ),
-      body: Stack(
-        alignment: Alignment.topCenter,
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Introduction Card
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.primaryPurple.withValues(alpha: 0.1),
-                        AppColors.infoBlue.withValues(alpha: 0.1),
-                      ],
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _getDifficultyColor(),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              widget.lesson.difficultyLabel,
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Icon(
-                            Icons.access_time,
-                            size: 16,
-                            color: Colors.grey.shade600,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${widget.lesson.estimatedDuration} min',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'What you\'ll learn:',
-                        style: AppTextStyles.titleMedium.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimaryLight,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      ...widget.lesson.objectives.map(
-                        (objective) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(
-                                Icons.check_circle,
-                                color: AppColors.primaryPurple,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  objective,
-                                  style: AppTextStyles.bodyMedium.copyWith(
-                                    color: AppColors.textPrimaryLight,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // Theory Section
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: LessonTheorySection(
-                    theoryText: widget.lesson.content.theoryText,
-                    tips: widget.lesson.content.tips,
-                    illustrationUrl: widget.lesson.content.illustrationUrl,
-                  ),
-                ),
-                // Demo Section
-                if (widget.lesson.content.demoNotes.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: LessonDemoSection(
-                      demoNotes: widget.lesson.content.demoNotes,
-                    ),
-                  ),
-                // Practice Section
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
+      body: AnimatedBackground(
+        child: Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Introduction Card
+                  GlassContainer(
+                    borderRadius: BorderRadius.zero,
+                    color: AppColors.surfaceLight.withOpacity(0.5),
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            const Icon(
-                              Icons.piano,
-                              color: AppColors.primaryPurple,
-                              size: 24,
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: _getDifficultyColor(),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                widget.lesson.difficultyLabel,
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                             const SizedBox(width: 12),
+                            Icon(
+                              Icons.access_time,
+                              size: 16,
+                              color: AppColors.textSecondaryLight,
+                            ),
+                            const SizedBox(width: 4),
                             Text(
-                              'Your Turn!',
-                              style: AppTextStyles.titleMedium.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimaryLight,
+                              '${widget.lesson.estimatedDuration} min',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color:
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.white70
+                                    : AppColors.textSecondaryLight,
                               ),
                             ),
-                            const Spacer(),
-                            if (_playedNotes.isNotEmpty)
-                              TextButton.icon(
-                                onPressed: _resetPractice,
-                                icon: const Icon(Icons.refresh, size: 16),
-                                label: const Text('Reset'),
-                              ),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         Text(
-                          'Play these notes:',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textSecondaryLight,
+                          'What you\'ll learn:',
+                          style: AppTextStyles.titleMedium.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : AppColors.textPrimaryLight,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          children: widget.lesson.content.practiceNotes
-                              .asMap()
-                              .entries
-                              .map((entry) {
-                                final index = entry.key;
-                                final note = entry.value;
-                                final isPlayed = index < _playedNotes.length;
-                                final isCorrect =
-                                    isPlayed && _playedNotes[index] == note;
-
-                                return Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: isCorrect
-                                            ? Colors.green
-                                            : isPlayed
-                                            ? Colors.red
-                                            : Colors.grey.shade200,
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        note,
-                                        style: AppTextStyles.bodyMedium
-                                            .copyWith(
-                                              color: isPlayed
-                                                  ? Colors.white
-                                                  : AppColors.textPrimaryLight,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                    )
-                                    .animate(target: isCorrect ? 1 : 0)
-                                    .scale(
-                                      begin: const Offset(1, 1),
-                                      end: const Offset(1.1, 1.1),
-                                      duration: 200.ms,
-                                      curve: Curves.easeOutBack,
-                                    );
-                              })
-                              .toList(),
-                        ),
-                        const SizedBox(height: 16),
-                        PianoKeyboard(
-                          numberOfOctaves: 1,
-                          showLabels: true,
-                          highlightedNotes: widget.lesson.notesToLearn
-                              .map((noteStr) => _getNoteFromString(noteStr))
-                              .whereType<Note>()
-                              .toList(),
-                          onNotePlayed: _handleNotePlayed,
-                          enableSound: true,
-                          keyWidth: 45,
-                          keyHeight: 150,
+                        const SizedBox(height: 12),
+                        ...widget.lesson.objectives.map(
+                          (objective) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.check_circle,
+                                  color: AppColors.primaryPurple,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    objective,
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                      color:
+                                          Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.white
+                                          : AppColors.textPrimaryLight,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                ),
-                // Bottom Actions
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        width: double.infinity,
-                        child:
-                            ElevatedButton(
-                                  onPressed: _practiceCompleted
-                                      ? _markAsCompleted
-                                      : null,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primaryPurple,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    disabledBackgroundColor:
-                                        Colors.grey.shade300,
-                                  ),
-                                  child: const Text(
-                                    'Mark as Completed',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                )
-                                .animate(
-                                  target: _practiceCompleted ? 1 : 0,
-                                  onPlay: (c) => c.repeat(reverse: true),
-                                )
-                                .scaleXY(
-                                  end: 1.05,
-                                  duration: 1.seconds,
-                                  curve: Curves.easeInOut,
-                                ),
+                  const SizedBox(height: 16),
+                  // Theory Section
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: LessonTheorySection(
+                      theoryText: widget.lesson.content.theoryText,
+                      tips: widget.lesson.content.tips,
+                      illustrationUrl: widget.lesson.content.illustrationUrl,
+                    ),
+                  ),
+                  // Demo Section
+                  if (widget.lesson.content.demoNotes.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: LessonDemoSection(
+                        demoNotes: widget.lesson.content.demoNotes,
                       ),
-                      if (!_practiceCompleted)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            'Complete the practice to mark this lesson as done',
-                            style: AppTextStyles.bodySmall.copyWith(
+                    ),
+                  // Practice Section
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: GlassContainer(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.piano,
+                                color: AppColors.primaryPurple,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Your Turn!',
+                                style: AppTextStyles.titleMedium.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.white
+                                      : AppColors.textPrimaryLight,
+                                ),
+                              ),
+                              const Spacer(),
+                              if (_playedNotes.isNotEmpty)
+                                TextButton.icon(
+                                  onPressed: _resetPractice,
+                                  icon: const Icon(Icons.refresh, size: 16),
+                                  label: const Text('Reset'),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Play these notes:',
+                            style: AppTextStyles.bodyMedium.copyWith(
                               color: AppColors.textSecondaryLight,
                             ),
-                            textAlign: TextAlign.center,
                           ),
-                        ),
-                    ],
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            children: widget.lesson.content.practiceNotes
+                                .asMap()
+                                .entries
+                                .map((entry) {
+                                  final index = entry.key;
+                                  final note = entry.value;
+                                  final isPlayed = index < _playedNotes.length;
+                                  final isCorrect =
+                                      isPlayed && _playedNotes[index] == note;
+
+                                  return Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: isCorrect
+                                              ? AppColors.successGreen
+                                              : isPlayed
+                                              ? AppColors.errorRed
+                                              : Colors.grey.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.grey.withOpacity(0.2),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          note,
+                                          style: AppTextStyles.bodyMedium.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: isPlayed
+                                                ? Colors.white
+                                                : (Theme.of(
+                                                            context,
+                                                          ).brightness ==
+                                                          Brightness.dark
+                                                      ? Colors.white
+                                                      : AppColors
+                                                            .textPrimaryLight),
+                                          ),
+                                        ),
+                                      )
+                                      .animate(target: isCorrect ? 1 : 0)
+                                      .scale(
+                                        begin: const Offset(1, 1),
+                                        end: const Offset(1.1, 1.1),
+                                        duration: 200.ms,
+                                        curve: Curves.easeOutBack,
+                                      );
+                                })
+                                .toList(),
+                          ),
+                          const SizedBox(height: 16),
+                          PianoKeyboard(
+                            numberOfOctaves: 1,
+                            showLabels: true,
+                            highlightedNotes: widget.lesson.notesToLearn
+                                .map((noteStr) => _getNoteFromString(noteStr))
+                                .whereType<Note>()
+                                .toList(),
+                            onNotePlayed: _handleNotePlayed,
+                            enableSound: true,
+                            keyWidth: 45,
+                            keyHeight: 150,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+                  // Bottom Actions
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          child:
+                              ElevatedButton(
+                                    onPressed: _practiceCompleted
+                                        ? _markAsCompleted
+                                        : null,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primaryPurple,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      disabledBackgroundColor:
+                                          Colors.grey.shade300,
+                                    ),
+                                    child: const Text(
+                                      'Mark as Completed',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  )
+                                  .animate(
+                                    target: _practiceCompleted ? 1 : 0,
+                                    onPlay: (c) => c.repeat(reverse: true),
+                                  )
+                                  .scaleXY(
+                                    end: 1.05,
+                                    duration: 1.seconds,
+                                    curve: Curves.easeInOut,
+                                  ),
+                        ),
+                        if (!_practiceCompleted)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              'Complete the practice to mark this lesson as done',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.textSecondaryLight,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+              colors: const [
+                Colors.green,
+                Colors.blue,
+                Colors.pink,
+                Colors.orange,
+                Colors.purple,
               ],
             ),
-          ),
-          ConfettiWidget(
-            confettiController: _confettiController,
-            blastDirectionality: BlastDirectionality.explosive,
-            shouldLoop: false,
-            colors: const [
-              Colors.green,
-              Colors.blue,
-              Colors.pink,
-              Colors.orange,
-              Colors.purple,
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -465,13 +477,13 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
   Color _getDifficultyColor() {
     switch (widget.lesson.difficulty.toLowerCase()) {
       case 'beginner':
-        return Colors.green;
+        return AppColors.successGreen;
       case 'intermediate':
-        return Colors.orange;
+        return AppColors.warningOrange;
       case 'advanced':
-        return Colors.red;
+        return AppColors.errorRed;
       default:
-        return Colors.green;
+        return AppColors.successGreen;
     }
   }
 

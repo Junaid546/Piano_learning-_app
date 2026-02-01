@@ -4,6 +4,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/animated_background.dart';
 import '../../../core/utils/error_handler.dart';
 import '../providers/lessons_provider.dart';
 import '../widgets/lesson_card.dart';
@@ -26,103 +27,111 @@ class LessonsListScreen extends ConsumerWidget {
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: lessonsAsync.when(
-        data: (lessons) {
-          if (lessons.isEmpty) {
-            return NoLessonsEmptyState(
-              onRefresh: () async {
-                try {
-                  await seedLessons();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('✅ Lessons loaded successfully!'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(ErrorHandler.getErrorMessage(e)),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                }
-              },
-            );
-          }
-
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                // Progress header
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppColors.primaryPurple, AppColors.infoBlue],
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Your Progress',
-                        style: AppTextStyles.titleLarge.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+      body: AnimatedBackground(
+        child: lessonsAsync.when(
+          data: (lessons) {
+            if (lessons.isEmpty) {
+              return NoLessonsEmptyState(
+                onRefresh: () async {
+                  try {
+                    await seedLessons();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('✅ Lessons loaded successfully!'),
+                          backgroundColor: Colors.green,
                         ),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(ErrorHandler.getErrorMessage(e)),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                },
+              );
+            }
+
+            return SafeArea(
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Container(
+                      margin: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        gradient: AppColors.primaryGradient,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primaryPurple.withOpacity(0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      child: Column(
                         children: [
                           Text(
-                            '${stats['completed']}',
-                            style: AppTextStyles.displayMedium.copyWith(
+                            'Your Progress',
+                            style: AppTextStyles.titleLarge.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(
+                                '${stats['completed']}',
+                                style: AppTextStyles.displayLarge.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                ' / ${stats['total']} lessons',
+                                style: AppTextStyles.titleMedium.copyWith(
+                                  color: Colors.white.withOpacity(0.8),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: LinearProgressIndicator(
+                              value: (stats['percentage'] as int) / 100,
+                              minHeight: 8,
+                              backgroundColor: Colors.white.withOpacity(0.2),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
                           Text(
-                            ' / ${stats['total']} lessons',
-                            style: AppTextStyles.titleMedium.copyWith(
-                              color: Colors.white70,
+                            '${stats['percentage']}% Complete',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: LinearProgressIndicator(
-                          value: (stats['percentage'] as int) / 100,
-                          minHeight: 10,
-                          backgroundColor: Colors.white30,
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${stats['percentage']}% Complete',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                // Lessons by category
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: categories.map((category) {
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final category = categories[index];
                       final categoryLessons = lessons
                           .where((l) => l.category == category)
                           .toList();
@@ -131,33 +140,31 @@ class LessonsListScreen extends ConsumerWidget {
                         category: category,
                         lessons: categoryLessons,
                       );
-                    }).toList(),
+                    }, childCount: categories.length),
                   ),
+                  const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
+                ],
+              ),
+            );
+          },
+          loading: () => const Center(child: LoadingIndicator()),
+          error: (error, stack) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 60, color: Colors.red.shade300),
+                const SizedBox(height: 16),
+                Text('Error loading lessons', style: AppTextStyles.titleMedium),
+                const SizedBox(height: 8),
+                Text(
+                  error.toString(),
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: Colors.grey.shade600,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
-          );
-        },
-        loading: () => const Center(child: LoadingIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 60, color: Colors.red.shade300),
-              const SizedBox(height: 16),
-              const Text(
-                'Error loading lessons',
-                style: AppTextStyles.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                error.toString(),
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: Colors.grey.shade600,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
           ),
         ),
       ),
@@ -193,7 +200,9 @@ class _CategorySection extends StatelessWidget {
                 category,
                 style: AppTextStyles.titleLarge.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimaryLight,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : AppColors.textPrimaryLight,
                 ),
               ),
             ],

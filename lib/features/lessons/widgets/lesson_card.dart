@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/utils/animations.dart';
+import '../../../core/widgets/glass_container.dart';
 import '../models/lesson.dart';
 
 class LessonCard extends StatelessWidget {
@@ -13,62 +14,47 @@ class LessonCard extends StatelessWidget {
   Color _getDifficultyColor() {
     switch (lesson.difficulty.toLowerCase()) {
       case 'beginner':
-        return Colors.green;
+        return AppColors.successGreen;
       case 'intermediate':
-        return Colors.orange;
+        return AppColors.warningOrange;
       case 'advanced':
-        return Colors.red;
+        return AppColors.errorRed;
       default:
-        return Colors.green;
+        return AppColors.successGreen;
     }
-  }
-
-  IconData _getStatusIcon() {
-    if (lesson.isCompleted) return Icons.check_circle;
-    if (lesson.isLocked) return Icons.lock;
-    return Icons.play_circle_outline;
-  }
-
-  Color _getStatusColor() {
-    if (lesson.isCompleted) return Colors.green;
-    if (lesson.isLocked) return Colors.grey;
-    return AppColors.primaryPurple;
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedPressScale(
       onPressed: lesson.isLocked ? null : onTap,
-      child: Container(
+      child: GlassContainer(
         margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          gradient: lesson.isLocked
-              ? LinearGradient(
-                  colors: [Colors.grey.shade300, Colors.grey.shade200],
-                )
-              : LinearGradient(
-                  colors: [
-                    AppColors.primaryPurple.withValues(alpha: 0.1),
-                    AppColors.infoBlue.withValues(alpha: 0.1),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: lesson.isCompleted
-                ? Colors.green.withValues(alpha: 0.3)
-                : Colors.transparent,
-            width: 2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+        padding: EdgeInsets.zero,
+        opacity: lesson.isLocked ? 0.05 : 0.1,
+        border: Border.all(
+          color: lesson.isCompleted
+              ? AppColors.successGreen.withOpacity(0.5)
+              : lesson.isLocked
+              ? Colors.grey.withOpacity(0.2)
+              : AppColors.primaryPurple.withOpacity(0.2),
+          width: 1.5,
         ),
+        gradient: lesson.isLocked
+            ? LinearGradient(
+                colors: [
+                  Colors.grey.withOpacity(0.1),
+                  Colors.grey.withOpacity(0.05),
+                ],
+              )
+            : LinearGradient(
+                colors: [
+                  AppColors.surfaceLight.withOpacity(0.8),
+                  AppColors.surfaceLight.withOpacity(0.5),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
         child: Stack(
           children: [
             Padding(
@@ -80,15 +66,29 @@ class LessonCard extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: _getStatusColor(),
+                      gradient: lesson.isLocked
+                          ? null
+                          : AppColors.primaryGradient,
+                      color: lesson.isLocked
+                          ? Colors.grey.withOpacity(0.3)
+                          : null,
                       shape: BoxShape.circle,
+                      boxShadow: lesson.isLocked
+                          ? []
+                          : [
+                              BoxShadow(
+                                color: AppColors.primaryPurple.withOpacity(0.4),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                     ),
                     child: Center(
                       child: lesson.isLocked
                           ? const Icon(
                               Icons.lock,
-                              color: Colors.white,
-                              size: 24,
+                              color: Colors.white70,
+                              size: 20,
                             )
                           : Text(
                               '${lesson.order}',
@@ -112,7 +112,7 @@ class LessonCard extends StatelessWidget {
                             style: AppTextStyles.titleMedium.copyWith(
                               fontWeight: FontWeight.bold,
                               color: lesson.isLocked
-                                  ? Colors.grey.shade600
+                                  ? AppColors.textTertiaryLight
                                   : AppColors.textPrimaryLight,
                             ),
                           ),
@@ -122,43 +122,58 @@ class LessonCard extends StatelessWidget {
                           lesson.description,
                           style: AppTextStyles.bodySmall.copyWith(
                             color: lesson.isLocked
-                                ? Colors.grey.shade500
+                                ? AppColors.textTertiaryLight
                                 : AppColors.textSecondaryLight,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 12),
                         Row(
                           children: [
                             // Duration
                             Icon(
-                              Icons.access_time,
+                              Icons.access_time_rounded,
                               size: 14,
-                              color: Colors.grey.shade600,
+                              color: AppColors.textTertiary,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               '${lesson.estimatedDuration} min',
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color: Colors.grey.shade600,
+                              style: AppTextStyles.labelSmall.copyWith(
+                                color: AppColors.textTertiary,
                               ),
                             ),
                             const SizedBox(width: 16),
                             // Difficulty
                             Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: _getDifficultyColor(),
-                                shape: BoxShape.circle,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
                               ),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              lesson.difficultyLabel,
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color: Colors.grey.shade600,
+                              decoration: BoxDecoration(
+                                color: _getDifficultyColor().withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: BoxDecoration(
+                                      color: _getDifficultyColor(),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    lesson.difficultyLabel,
+                                    style: AppTextStyles.labelSmall.copyWith(
+                                      color: _getDifficultyColor(),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -166,34 +181,48 @@ class LessonCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // Status icon
-                  Icon(_getStatusIcon(), color: _getStatusColor(), size: 32),
+                  // Chevron
+                  if (!lesson.isLocked)
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: AppColors.primaryPurple.withOpacity(0.5),
+                      size: 24,
+                    ),
                 ],
               ),
             ),
             // Status badge
-            if (lesson.isCompleted || !lesson.isLocked)
+            if (lesson.isCompleted)
               Positioned(
-                top: 8,
-                right: 8,
+                top: 0,
+                right: 0,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
+                    horizontal: 12,
+                    vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: lesson.isCompleted
-                        ? Colors.green
-                        : AppColors.primaryPurple,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    lesson.statusLabel,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
+                    color: AppColors.successGreen,
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(20),
+                      bottomLeft: Radius.circular(20),
                     ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.check, color: Colors.white, size: 12),
+                      const SizedBox(width: 4),
+                      Text(
+                        'COMPLETED',
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

@@ -407,6 +407,7 @@ class SyncService {
       'email': row['email'],
       'displayName': row['displayName'],
       'profileImageUrl': row['profileImageUrl'],
+      'bio': row['bio'],
       'createdAt': row['createdAt'],
       'lastLogin': row['lastLogin'],
     };
@@ -423,6 +424,7 @@ class SyncService {
         'email': userData['email'],
         'displayName': userData['displayName'],
         'profileImageUrl': userData['profileImageUrl'],
+        'bio': userData['bio'],
         'createdAt': userData['createdAt'],
         'lastLogin': userData['lastLogin'] ?? DateTime.now().toIso8601String(),
       });

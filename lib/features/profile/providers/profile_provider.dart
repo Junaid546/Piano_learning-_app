@@ -56,6 +56,7 @@ final profileActionsProvider = Provider<ProfileActions>((ref) {
 
 class ProfileActions {
   final Ref _ref;
+  final _syncService = SyncService();
 
   ProfileActions(this._ref);
 
@@ -76,10 +77,33 @@ class ProfileActions {
       if (learningGoal != null) updates['learningGoal'] = learningGoal;
       if (skillLevel != null) updates['skillLevel'] = skillLevel;
 
+      // 1. Update Firestore
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .update(updates);
+
+      // 2. Update Local Cache (Optimistic or fetch-based)
+      // We fetch current cache, merge updates, and save back
+      final currentUserData = await _syncService.getUserFromCache(user.uid);
+
+      final Map<String, dynamic> cacheData =
+          currentUserData ??
+          {
+            'email': user.email ?? '',
+            'displayName': user.displayName ?? '',
+            'profileImageUrl': user.photoURL,
+            'createdAt': DateTime.now().toIso8601String(),
+          };
+
+      // Merge updates
+      if (displayName != null) cacheData['displayName'] = displayName;
+      if (bio != null) cacheData['bio'] = bio;
+      // learningGoal and skillLevel are likely in preferences or separate fields not in main user table yet,
+      // but if we added them to user table we would update them here.
+      // For now, based on schema, we only sync displayName and bio to sqlite users table.
+
+      await _syncService.saveUserToCache(user.uid, cacheData);
     } catch (e) {
       debugPrint('Error updating profile: $e');
       rethrow;
@@ -92,10 +116,14 @@ class ProfileActions {
       final user = _ref.read(authProvider).firebaseUser;
       if (user == null) return;
 
+      // 1. Update Firestore
       await FirebaseFirestore.instance
           .collection('user_preferences')
           .doc(user.uid)
           .set(preferences.toJson(), SetOptions(merge: true));
+
+      // 2. Update Cache
+      await _syncService.updateUserPreferencesInCache(preferences);
     } catch (e) {
       debugPrint('Error updating preferences: $e');
       rethrow;
@@ -106,7 +134,11 @@ class ProfileActions {
   Future<String?> uploadProfilePicture(File imageFile) async {
     try {
       final user = _ref.read(authProvider).firebaseUser;
-      if (user == null) return null;
+      if (user == null) throw Exception('User not logged in');
+
+      if (!imageFile.existsSync()) {
+        throw Exception('Image file does not exist');
+      }
 
       // Create a reference to the storage location
       final storageRef = FirebaseStorage.instance
@@ -115,19 +147,32 @@ class ProfileActions {
           .child('${user.uid}.jpg');
 
       // Upload the file
-      final uploadTask = await storageRef.putFile(imageFile);
+      // Set metadata to ensure correct content type
+      final metadata = SettableMetadata(contentType: 'image/jpeg');
+      final uploadTask = await storageRef.putFile(imageFile, metadata);
 
       // Get the download URL
       final downloadUrl = await uploadTask.ref.getDownloadURL();
 
-      // Update user document with new profile image URL
+      // Update user document with new profile image URL in Firestore
       await FirebaseFirestore.instance.collection('users').doc(user.uid).update(
         {'profileImageUrl': downloadUrl},
       );
 
+      // Update Cache
+      final currentUserData = await _syncService.getUserFromCache(user.uid);
+      if (currentUserData != null) {
+        currentUserData['profileImageUrl'] = downloadUrl;
+        await _syncService.saveUserToCache(user.uid, currentUserData);
+      }
+
       return downloadUrl;
     } catch (e) {
       debugPrint('Error uploading profile picture: $e');
+      if (e is FirebaseException) {
+        debugPrint('Firebase Storage Error: ${e.code} - ${e.message}');
+        throw Exception('Upload failed: ${e.message}');
+      }
       rethrow;
     }
   }

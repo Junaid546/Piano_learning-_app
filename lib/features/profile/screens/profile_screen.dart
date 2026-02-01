@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_text_styles.dart';
 import '../../../core/widgets/loading_indicator.dart';
+import '../../../core/widgets/animated_background.dart';
+import '../../../core/widgets/glass_container.dart';
+import '../../../core/widgets/premium_button.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../progress/providers/progress_provider.dart';
 import '../../piano/providers/audio_service_provider.dart';
@@ -56,58 +61,71 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final memberSince = userAsync.userModel?.createdAt ?? DateTime.now();
 
     return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Profile Header
-              ProfileHeader(
-                profileImageUrl: profileImageUrl,
-                displayName: displayName,
-                email: email,
-                memberSince: memberSince,
-                onEditTap: () {
-                  // Navigate to edit profile
-                  context.push('/profile/edit');
-                },
-                onImageTap: () {
-                  // Show full image or change picture
-                },
-              ),
+      body: AnimatedBackground(
+        child: SafeArea(
+          bottom: false,
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                // Profile Header
+                ProfileHeader(
+                  profileImageUrl: profileImageUrl,
+                  displayName: displayName,
+                  email: email,
+                  memberSince: memberSince,
+                  onEditTap: () {
+                    context.push('/edit-profile');
+                  },
+                  onImageTap: () {
+                    // Show full image or change picture
+                  },
+                  onShareTap: () {
+                    final progress = progressAsync.asData?.value;
+                    final level = progress?.level ?? 1;
+                    final lessons = progress?.lessonsCompleted ?? 0;
 
-              const SizedBox(height: 16),
-
-              // Stats Cards
-              progressAsync.when(
-                data: (progress) => _buildStatsCards(progress),
-                loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
-              ),
-
-              // Settings Sections
-              preferencesAsync.when(
-                data: (preferences) => Column(
-                  children: [
-                    _buildAppPreferences(preferences),
-                    _buildAudioSettings(),
-                    _buildLearningSettings(preferences),
-                    _buildAccountSection(),
-                    _buildAboutSection(),
-                    _buildLogoutSection(),
-                    const SizedBox(height: 100), // Bottom padding
-                  ],
+                    Share.share(
+                      '🎵 I\'m learning piano on Melodify! 🎹\n'
+                      'I\'ve reached Level $level and completed $lessons lessons!\n'
+                      'Join me in mastering the piano! 🚀',
+                      subject: 'My Melodify Progress',
+                    );
+                  },
                 ),
-                loading: () => const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(32.0),
-                    child: LoadingIndicator(),
+
+                const SizedBox(height: 16),
+
+                // Stats Cards
+                progressAsync.when(
+                  data: (progress) => _buildStatsCards(progress),
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
+
+                // Settings Sections
+                preferencesAsync.when(
+                  data: (preferences) => Column(
+                    children: [
+                      _buildAppPreferences(preferences),
+                      _buildAudioSettings(),
+                      _buildLearningSettings(preferences),
+                      _buildAccountSection(),
+                      _buildAboutSection(),
+                      _buildLogoutSection(),
+                      const SizedBox(height: 100), // Bottom padding
+                    ],
                   ),
+                  loading: () => const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32.0),
+                      child: LoadingIndicator(),
+                    ),
+                  ),
+                  error: (error, stack) =>
+                      Center(child: Text('Error loading preferences: $error')),
                 ),
-                error: (error, stack) =>
-                    Center(child: Text('Error loading preferences: $error')),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -534,18 +552,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           onTap: () {
             // TODO: Open help
           },
-        ),
-        SettingsTile(
-          icon: Icons.play_circle,
-          iconColor: Colors.purple,
-          title: 'Tutorial Replay',
-          trailing: const Icon(
-            Icons.chevron_right,
-            color: AppColors.textTertiary,
-          ),
-          onTap: () {
-            // TODO: Replay tutorial
-          },
           showDivider: false,
         ),
       ],
@@ -697,35 +703,75 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void _showDeleteAccountDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Account'),
-        content: const Text(
-          'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.',
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: GlassContainer(
+          borderRadius: BorderRadius.circular(24),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.errorRed.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.warning_amber_rounded,
+                  color: AppColors.errorRed,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Delete Account',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimaryLight,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textSecondaryLight,
+                ),
+              ),
+              const SizedBox(height: 24),
+              PremiumButton(
+                label: 'Delete Forever',
+                color: AppColors.errorRed,
+                icon: Icons.delete_forever,
+                onPressed: () async {
+                  Navigator.pop(context);
+                  try {
+                    await ref.read(profileActionsProvider).deleteAccount();
+                    if (mounted) {
+                      context.go('/login');
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Error: $e'),
+                          backgroundColor: AppColors.errorRed,
+                        ),
+                      );
+                    }
+                  }
+                },
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              try {
-                await ref.read(profileActionsProvider).deleteAccount();
-                if (mounted) {
-                  context.go('/login');
-                }
-              } catch (e) {
-                // Show error
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('Error: $e')));
-              }
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
       ),
     );
   }
