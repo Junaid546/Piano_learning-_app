@@ -17,6 +17,9 @@ import '../features/practice/screens/practice_results_screen.dart';
 import '../features/progress/screens/progress_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
 import '../features/profile/screens/edit_profile_screen.dart';
+import '../features/profile/screens/change_password_screen.dart';
+import '../features/profile/screens/privacy_policy_screen.dart';
+import '../features/profile/screens/terms_of_service_screen.dart';
 import '../features/free_piano/screens/premium_landscape_piano_screen.dart';
 
 // Models
@@ -211,6 +214,36 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => _buildSlidePage(
           key: state.pageKey,
           child: const EditProfileScreen(),
+        ),
+      ),
+
+      // ==================== CHANGE PASSWORD (Outside Shell) ====================
+      GoRoute(
+        path: '/change-password',
+        name: 'change-password',
+        pageBuilder: (context, state) => _buildSlidePage(
+          key: state.pageKey,
+          child: const ChangePasswordScreen(),
+        ),
+      ),
+
+      // ==================== PRIVACY POLICY (Outside Shell) ====================
+      GoRoute(
+        path: '/privacy-policy',
+        name: 'privacy-policy',
+        pageBuilder: (context, state) => _buildSlidePage(
+          key: state.pageKey,
+          child: const PrivacyPolicyScreen(),
+        ),
+      ),
+
+      // ==================== TERMS OF SERVICE (Outside Shell) ====================
+      GoRoute(
+        path: '/terms-of-service',
+        name: 'terms-of-service',
+        pageBuilder: (context, state) => _buildSlidePage(
+          key: state.pageKey,
+          child: const TermsOfServiceScreen(),
         ),
       ),
 

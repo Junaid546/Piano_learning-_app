@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../../core/widgets/glass_container.dart';
 import '../../piano/models/note.dart';
 import '../../piano/services/audio_player_service.dart';
 
@@ -22,14 +23,12 @@ class _LessonDemoSectionState extends State<LessonDemoSection> {
   @override
   void initState() {
     super.initState();
-    // Initialize audio service asynchronously
     _audioService.initialize();
   }
 
   Future<void> _playDemo() async {
     if (_isPlaying) return;
 
-    // Ensure audio service is initialized before playing
     if (!_audioService.isInitialized) {
       await _audioService.initialize();
     }
@@ -48,7 +47,6 @@ class _LessonDemoSectionState extends State<LessonDemoSection> {
         _audioService.playNote(note);
       }
 
-      // Wait based on playback speed
       await Future.delayed(
         Duration(milliseconds: (800 / _playbackSpeed).round()),
       );
@@ -69,7 +67,6 @@ class _LessonDemoSectionState extends State<LessonDemoSection> {
   }
 
   Note? _getNoteFromString(String noteStr) {
-    // Map note strings to Note objects
     final noteMap = {
       'C4': Note.c4,
       'Db4': Note.cSharp4,
@@ -101,120 +98,151 @@ class _LessonDemoSectionState extends State<LessonDemoSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+
+    return GlassContainer(
+      margin: const EdgeInsets.symmetric(vertical: 6),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      opacity: isDark ? 0.12 : 0.08,
+      borderRadius: BorderRadius.circular(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.headphones, color: AppColors.infoBlue, size: 24),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.infoBlue.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.headphones, color: AppColors.infoBlue, size: 20),
+              ),
               const SizedBox(width: 12),
               Text(
                 'Watch & Listen',
-                style: AppTextStyles.titleMedium.copyWith(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimaryLight,
+                  fontSize: 16,
+                  color: textPrimary,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.infoBlue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  '${_playbackSpeed}x',
+                  style: TextStyle(
+                    color: AppColors.infoBlue,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           // Notes display
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.backgroundLight,
-              borderRadius: BorderRadius.circular(12),
+              color: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: AppColors.infoBlue.withOpacity(0.15),
+              ),
             ),
             child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: 6,
+              runSpacing: 6,
               children: widget.demoNotes.asMap().entries.map((entry) {
                 final index = entry.key;
                 final note = entry.value;
                 final isActive = index == _currentNoteIndex;
 
                 return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: isActive ? AppColors.primaryPurple : Colors.white,
-                    borderRadius: BorderRadius.circular(8),
+                    color: isActive ? AppColors.infoBlue : surfaceColor,
+                    borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                      color: isActive
-                          ? AppColors.primaryPurple
-                          : Colors.grey.shade300,
-                      width: 2,
+                      color: isActive ? AppColors.infoBlue : AppColors.infoBlue.withOpacity(0.2),
                     ),
                   ),
                   child: Text(
                     note,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: isActive
-                          ? Colors.white
-                          : AppColors.textPrimaryLight,
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: isActive ? Colors.white : textPrimary,
                     ),
                   ),
                 );
               }).toList(),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           // Controls
           Row(
             children: [
               Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: _isPlaying ? _stopDemo : _playDemo,
-                  icon: Icon(_isPlaying ? Icons.stop : Icons.play_arrow),
-                  label: Text(_isPlaying ? 'Stop' : 'Play Demo'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _isPlaying
-                        ? Colors.red
-                        : AppColors.infoBlue,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                child: GestureDetector(
+                  onTap: _isPlaying ? _stopDemo : _playDemo,
+                  child: Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      gradient: _isPlaying
+                          ? const LinearGradient(colors: [AppColors.errorRed, Color(0xFFFF5252)])
+                          : const LinearGradient(colors: [AppColors.infoBlue, Color(0xFF64B5F6)]),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          _isPlaying ? Icons.stop : Icons.play_arrow,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          _isPlaying ? 'Stop' : 'Play Demo',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              // Speed control
+              const SizedBox(width: 10),
+              // Speed dropdown
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(12),
+                  color: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight,
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: DropdownButton<double>(
                   value: _playbackSpeed,
                   underline: const SizedBox(),
+                  icon: Icon(Icons.speed, color: AppColors.infoBlue, size: 16),
+                  dropdownColor: surfaceColor,
                   items: const [
-                    DropdownMenuItem(value: 0.5, child: Text('0.5x')),
-                    DropdownMenuItem(value: 0.75, child: Text('0.75x')),
-                    DropdownMenuItem(value: 1.0, child: Text('1x')),
-                    DropdownMenuItem(value: 1.5, child: Text('1.5x')),
+                    DropdownMenuItem(value: 0.5, child: Text('0.5x', style: TextStyle(fontSize: 12))),
+                    DropdownMenuItem(value: 0.75, child: Text('0.75x', style: TextStyle(fontSize: 12))),
+                    DropdownMenuItem(value: 1.0, child: Text('1x', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
+                    DropdownMenuItem(value: 1.5, child: Text('1.5x', style: TextStyle(fontSize: 12))),
                   ],
                   onChanged: (value) {
                     setState(() => _playbackSpeed = value ?? 1.0);
@@ -230,8 +258,6 @@ class _LessonDemoSectionState extends State<LessonDemoSection> {
 
   @override
   void dispose() {
-    // Don't dispose AudioPlayerService - it's a singleton!
-    // Just stop any playing sounds
     _audioService.stopAll();
     super.dispose();
   }

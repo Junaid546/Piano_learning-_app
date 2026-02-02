@@ -19,18 +19,23 @@ class ScoreDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
         ],
+        border: Border.all(
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade200,
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -41,9 +46,10 @@ class ScoreDisplay extends StatelessWidget {
             iconColor: Colors.amber,
             label: 'Score',
             value: score.toString(),
-            valueKey: ValueKey('score_$score'), // Trigger animation on change
+            valueKey: ValueKey('score_$score'),
+            isDark: isDark,
           ),
-          _buildDivider(),
+          _buildDivider(isDark: isDark),
           // Streak
           _buildStat(
             icon: Icons.local_fire_department,
@@ -52,14 +58,16 @@ class ScoreDisplay extends StatelessWidget {
             value: streak.toString(),
             suffix: streak > 0 ? ' 🔥' : '',
             isStreak: true,
+            isDark: isDark,
           ),
-          _buildDivider(),
+          _buildDivider(isDark: isDark),
           // Accuracy
           _buildStat(
             icon: Icons.gps_fixed,
             iconColor: _getAccuracyColor(),
             label: 'Accuracy',
             value: '${accuracy.toStringAsFixed(0)}%',
+            isDark: isDark,
           ),
         ],
       ),
@@ -74,16 +82,16 @@ class ScoreDisplay extends StatelessWidget {
     String suffix = '',
     Key? valueKey,
     bool isStreak = false,
+    required bool isDark,
   }) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, color: iconColor, size: 24)
             .animate(
-              target:
-                  isStreak &&
-                      int.tryParse(value) != null &&
-                      int.parse(value) > 5
+              target: isStreak &&
+                  int.tryParse(value) != null &&
+                  int.parse(value) > 5
                   ? 1
                   : 0,
             )
@@ -93,45 +101,49 @@ class ScoreDisplay extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-                  value,
-                  style: AppTextStyles.titleMedium.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimaryLight,
-                  ),
-                )
+              value,
+              style: AppTextStyles.titleMedium.copyWith(
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : AppColors.textPrimaryLight,
+              ),
+            )
                 .animate(key: valueKey)
                 .scale(
-                  duration: 200.ms,
-                  curve: Curves.easeOutBack,
-                ), // Bump on update
+              duration: 200.ms,
+              curve: Curves.easeOutBack,
+            ),
             if (suffix.isNotEmpty)
               Text(
-                    suffix,
-                    style: AppTextStyles.titleMedium.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimaryLight,
-                    ),
-                  )
+                suffix,
+                style: AppTextStyles.titleMedium.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : AppColors.textPrimaryLight,
+                ),
+              )
                   .animate(onPlay: (c) => c.repeat(reverse: true))
                   .scale(
-                    begin: const Offset(1, 1),
-                    end: const Offset(1.3, 1.3),
-                    duration: 800.ms,
-                  ),
+                begin: const Offset(1, 1),
+                end: const Offset(1.3, 1.3),
+                duration: 800.ms,
+              ),
           ],
         ),
         Text(
           label,
           style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.textSecondaryLight,
+            color: isDark ? Colors.white70 : AppColors.textSecondaryLight,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildDivider() {
-    return Container(width: 1, height: 40, color: Colors.grey.shade200);
+  Widget _buildDivider({required bool isDark}) {
+    return Container(
+      width: 1,
+      height: 40,
+      color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade200,
+    );
   }
 
   Color _getAccuracyColor() {

@@ -462,8 +462,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             color: AppColors.textTertiary,
           ),
           onTap: () {
-            // TODO: Implement password change
-            _showComingSoonDialog();
+            context.push('/change-password');
           },
         ),
         SettingsTile(
@@ -475,7 +474,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             color: AppColors.textTertiary,
           ),
           onTap: () {
-            // TODO: Open privacy policy
+            context.push('/privacy-policy');
           },
         ),
         SettingsTile(
@@ -487,7 +486,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             color: AppColors.textTertiary,
           ),
           onTap: () {
-            // TODO: Open terms
+            context.push('/terms-of-service');
           },
         ),
         SettingsTile(
@@ -772,22 +771,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  void _showComingSoonDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Coming Soon'),
-        content: const Text('This feature is coming soon!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
       ),
     );
   }

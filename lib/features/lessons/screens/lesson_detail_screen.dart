@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:confetti/confetti.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lottie/lottie.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/widgets/glass_container.dart';
-import '../../../core/widgets/animated_background.dart';
 import '../models/lesson.dart';
 import '../providers/lessons_provider.dart';
 import '../widgets/lesson_theory_section.dart';
@@ -32,7 +30,7 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
   void initState() {
     super.initState();
     _confettiController = ConfettiController(
-      duration: const Duration(seconds: 3),
+      duration: const Duration(seconds: 2),
     );
   }
 
@@ -46,7 +44,6 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
     setState(() {
       _playedNotes.add(note.fullName);
 
-      // Check if practice is completed
       if (_playedNotes.length >= widget.lesson.content.practiceNotes.length) {
         _checkPracticeCompletion();
       }
@@ -75,42 +72,66 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Lottie.asset(
-              'assets/lottie/Success.json',
-              height: 60,
-              repeat: false,
+        backgroundColor: Colors.transparent,
+        contentPadding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        content: GlassContainer(
+          opacity: 0.15,
+          borderRadius: BorderRadius.circular(24),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Lottie.asset(
+                  'assets/lottie/Success.json',
+                  height: 100,
+                  repeat: false,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '🎉 Amazing!',
+                  style: AppTextStyles.titleLarge.copyWith(
+                    fontWeight: FontWeight.bold,
+                    foreground: Paint()
+                      ..shader = const LinearGradient(
+                        colors: [AppColors.primaryPurple, AppColors.primaryLight],
+                      ).createShader(const Rect.fromLTWH(0, 0, 200, 50)),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'You completed this lesson!',
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.textSecondaryDark
+                        : AppColors.textSecondaryLight,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryPurple,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Continue',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            const Text(
-              'Great Job!',
-            ).animate().fadeIn(duration: 400.ms).slideX(begin: -0.2, end: 0),
-          ],
+          ),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'You\'ve completed the practice section!',
-              style: AppTextStyles.bodyMedium,
-            ).animate().fadeIn(delay: 200.ms),
-            const SizedBox(height: 16),
-            Text(
-              '🎹 Keep practicing to master this lesson!',
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.textSecondaryLight,
-              ),
-            ).animate().fadeIn(delay: 400.ms),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Continue'),
-          ).animate().fadeIn(delay: 600.ms),
-        ],
       ),
     );
   }
@@ -120,9 +141,17 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
       await ref.read(lessonActionsProvider).markAsCompleted(widget.lesson.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Lesson marked as completed!'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                const Text('Lesson completed! 🎹'),
+              ],
+            ),
+            backgroundColor: AppColors.successGreen,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
         Navigator.pop(context);
@@ -130,7 +159,7 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.errorRed),
         );
       }
     }
@@ -145,89 +174,88 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final backgroundColor = isDark ? AppColors.backgroundDark : AppColors.backgroundLight;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Hero(
-          tag: 'lesson_title_${widget.lesson.id}',
-          child: Text(
-            widget.lesson.title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+      backgroundColor: backgroundColor,
+      body: Stack(
+        children: [
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            appBar: AppBar(
+              title: Hero(
+                tag: 'lesson_title_${widget.lesson.id}',
+                child: Text(
+                  widget.lesson.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              backgroundColor: AppColors.primaryPurple,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.bookmark_border, color: Colors.white),
+                  onPressed: () {},
+                ),
+              ],
             ),
-          ),
-        ),
-        backgroundColor: AppColors.primaryPurple,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(icon: const Icon(Icons.bookmark_border), onPressed: () {}),
-        ],
-      ),
-      body: AnimatedBackground(
-        child: Stack(
-          alignment: Alignment.topCenter,
-          children: [
-            SingleChildScrollView(
+            body: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Introduction Card
                   GlassContainer(
-                    borderRadius: BorderRadius.zero,
-                    color: AppColors.surfaceLight.withOpacity(0.5),
-                    width: double.infinity,
+                    margin: const EdgeInsets.all(16),
                     padding: const EdgeInsets.all(20),
+                    opacity: isDark ? 0.12 : 0.08,
+                    borderRadius: BorderRadius.circular(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
                                 color: _getDifficultyColor(),
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 widget.lesson.difficultyLabel,
-                                style: AppTextStyles.bodySmall.copyWith(
+                                style: const TextStyle(
                                   color: Colors.white,
-                                  fontWeight: FontWeight.w600,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            const Icon(
-                              Icons.access_time,
-                              size: 16,
-                              color: AppColors.textSecondaryLight,
-                            ),
+                            const SizedBox(width: 10),
+                            Icon(Icons.access_time, size: 14, color: textSecondary),
                             const SizedBox(width: 4),
                             Text(
                               '${widget.lesson.estimatedDuration} min',
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color:
-                                    Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? Colors.white70
-                                    : AppColors.textSecondaryLight,
-                              ),
+                              style: TextStyle(fontSize: 12, color: textSecondary),
                             ),
                           ],
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'What you\'ll learn:',
-                          style: AppTextStyles.titleMedium.copyWith(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                ? Colors.white
-                                : AppColors.textPrimaryLight,
+                            fontSize: 16,
+                            color: textPrimary,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -237,22 +265,21 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(
-                                  Icons.check_circle,
-                                  color: AppColors.primaryPurple,
-                                  size: 20,
+                                Container(
+                                  margin: const EdgeInsets.only(top: 3),
+                                  width: 18,
+                                  height: 18,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryPurple,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.check, color: Colors.white, size: 10),
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
                                     objective,
-                                    style: AppTextStyles.bodyMedium.copyWith(
-                                      color:
-                                          Theme.of(context).brightness ==
-                                              Brightness.dark
-                                          ? Colors.white
-                                          : AppColors.textPrimaryLight,
-                                    ),
+                                    style: TextStyle(color: textPrimary, height: 1.4),
                                   ),
                                 ),
                               ],
@@ -262,7 +289,7 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   // Theory Section
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -284,27 +311,29 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
                   Padding(
                     padding: const EdgeInsets.all(16),
                     child: GlassContainer(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(18),
+                      opacity: isDark ? 0.12 : 0.08,
+                      borderRadius: BorderRadius.circular(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
-                              const Icon(
-                                Icons.piano,
-                                color: AppColors.primaryPurple,
-                                size: 24,
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.successGreen.withOpacity(0.15),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.piano, color: AppColors.successGreen, size: 20),
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                'Your Turn!',
-                                style: AppTextStyles.titleMedium.copyWith(
+                                'Your Turn! 🎹',
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color:
-                                      Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.white
-                                      : AppColors.textPrimaryLight,
+                                  fontSize: 17,
+                                  color: textPrimary,
                                 ),
                               ),
                               const Spacer(),
@@ -313,19 +342,21 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
                                   onPressed: _resetPractice,
                                   icon: const Icon(Icons.refresh, size: 16),
                                   label: const Text('Reset'),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: AppColors.primaryPurple,
+                                  ),
                                 ),
                             ],
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 14),
                           Text(
-                            'Play these notes:',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.textSecondaryLight,
-                            ),
+                            'Play these notes in order:',
+                            style: TextStyle(color: textSecondary, fontSize: 13),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 10),
                           Wrap(
-                            spacing: 8,
+                            spacing: 6,
+                            runSpacing: 6,
                             children: widget.lesson.content.practiceNotes
                                 .asMap()
                                 .entries
@@ -333,65 +364,56 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
                                   final index = entry.key;
                                   final note = entry.value;
                                   final isPlayed = index < _playedNotes.length;
-                                  final isCorrect =
-                                      isPlayed && _playedNotes[index] == note;
+                                  final isCorrect = isPlayed && _playedNotes[index] == note;
 
                                   return Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: isCorrect
-                                              ? AppColors.successGreen
-                                              : isPlayed
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: isCorrect
+                                          ? AppColors.successGreen
+                                          : isPlayed
                                               ? AppColors.errorRed
-                                              : Colors.grey.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          border: Border.all(
-                                            color: Colors.grey.withOpacity(0.2),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          note,
-                                          style: AppTextStyles.bodyMedium.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: isPlayed
-                                                ? Colors.white
-                                                : (Theme.of(
-                                                            context,
-                                                          ).brightness ==
-                                                          Brightness.dark
-                                                      ? Colors.white
-                                                      : AppColors
-                                                            .textPrimaryLight),
-                                          ),
-                                        ),
-                                      )
-                                      .animate(target: isCorrect ? 1 : 0)
-                                      .scale(
-                                        begin: const Offset(1, 1),
-                                        end: const Offset(1.1, 1.1),
-                                        duration: 200.ms,
-                                        curve: Curves.easeOutBack,
-                                      );
+                                              : null,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: isCorrect
+                                            ? AppColors.successGreen
+                                            : isPlayed
+                                                ? AppColors.errorRed
+                                                : AppColors.successGreen.withOpacity(0.3),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      note,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: isPlayed ? Colors.white : textPrimary,
+                                      ),
+                                    ),
+                                  );
                                 })
                                 .toList(),
                           ),
-                          const SizedBox(height: 16),
-                          PianoKeyboard(
-                            numberOfOctaves: 1,
-                            showLabels: true,
-                            highlightedNotes: widget.lesson.notesToLearn
-                                .map((noteStr) => _getNoteFromString(noteStr))
-                                .whereType<Note>()
-                                .toList(),
-                            onNotePlayed: _handleNotePlayed,
-                            enableSound: true,
-                            keyWidth: 45,
-                            keyHeight: 150,
+                          const SizedBox(height: 20),
+                          // Piano keyboard
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: isDark ? AppColors.surfaceDark : AppColors.surfaceVariantLight,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: PianoKeyboard(
+                              numberOfOctaves: 1,
+                              showLabels: true,
+                              highlightedNotes: widget.lesson.notesToLearn
+                                  .map((noteStr) => _getNoteFromString(noteStr))
+                                  .whereType<Note>()
+                                  .toList(),
+                              onNotePlayed: _handleNotePlayed,
+                              enableSound: true,
+                              keyWidth: 40,
+                              keyHeight: 120,
+                            ),
                           ),
                         ],
                       ),
@@ -404,72 +426,68 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
                       children: [
                         SizedBox(
                           width: double.infinity,
-                          child:
-                              ElevatedButton(
-                                    onPressed: _practiceCompleted
-                                        ? _markAsCompleted
-                                        : null,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primaryPurple,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 16,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      disabledBackgroundColor:
-                                          Colors.grey.shade300,
-                                    ),
-                                    child: const Text(
-                                      'Mark as Completed',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  )
-                                  .animate(
-                                    target: _practiceCompleted ? 1 : 0,
-                                    onPlay: (c) => c.repeat(reverse: true),
-                                  )
-                                  .scaleXY(
-                                    end: 1.05,
-                                    duration: 1.seconds,
-                                    curve: Curves.easeInOut,
-                                  ),
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: _practiceCompleted ? _markAsCompleted : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _practiceCompleted
+                                  ? AppColors.primaryPurple
+                                  : AppColors.primaryPurple.withOpacity(0.4),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                if (_practiceCompleted) const Icon(Icons.verified, size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _practiceCompleted ? 'Mark as Completed' : 'Complete Practice First',
+                                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                         if (!_practiceCompleted)
                           Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Text(
-                              'Complete the practice to mark this lesson as done',
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color: AppColors.textSecondaryLight,
-                              ),
-                              textAlign: TextAlign.center,
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.info_outline, size: 14, color: textSecondary),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Play all notes correctly to unlock',
+                                  style: TextStyle(fontSize: 12, color: textSecondary),
+                                ),
+                              ],
                             ),
                           ),
                       ],
                     ),
                   ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
-            ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirectionality: BlastDirectionality.explosive,
-              shouldLoop: false,
-              colors: const [
-                Colors.green,
-                Colors.blue,
-                Colors.pink,
-                Colors.orange,
-                Colors.purple,
-              ],
-            ),
-          ],
-        ),
+          ),
+          // Confetti
+          ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirectionality: BlastDirectionality.explosive,
+            shouldLoop: false,
+            colors: const [
+              Colors.green,
+              Colors.blue,
+              Colors.pink,
+              Colors.orange,
+              Colors.purple,
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -501,6 +519,18 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
       'A4': Note.a4,
       'Bb4': Note.aSharp4,
       'B4': Note.b4,
+      'C5': Note.c5,
+      'Db5': Note.cSharp5,
+      'D5': Note.d5,
+      'Eb5': Note.dSharp5,
+      'E5': Note.e5,
+      'F5': Note.f5,
+      'Gb5': Note.fSharp5,
+      'G5': Note.g5,
+      'Ab5': Note.gSharp5,
+      'A5': Note.a5,
+      'Bb5': Note.aSharp5,
+      'B5': Note.b5,
     };
     return noteMap[noteStr];
   }

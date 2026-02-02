@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -208,16 +209,31 @@ class ProfileActions {
     }
   }
 
-  // Change password
+  // Change password with re-authentication
   Future<void> changePassword(
     String currentPassword,
     String newPassword,
   ) async {
     try {
-      // This would require re-authentication
-      // Implementation depends on your auth setup
-      // For now, we'll leave this as a placeholder
-      throw UnimplementedError('Password change requires re-authentication');
+      final user = _ref.read(authProvider).firebaseUser;
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+
+      if (user.email == null) {
+        throw Exception('User email not available');
+      }
+
+      // Re-authenticate user with current password
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPassword,
+      );
+
+      await user.reauthenticateWithCredential(credential);
+
+      // Update password
+      await user.updatePassword(newPassword);
     } catch (e) {
       debugPrint('Error changing password: $e');
       rethrow;
