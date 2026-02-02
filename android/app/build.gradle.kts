@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -6,9 +8,16 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+// Load keystore properties
+val keystoreProperties = Properties()
+val keystoreFile = rootProject.file("keystore.properties")
+if (keystoreFile.exists()) {
+    keystoreProperties.load(keystoreFile.inputStream())
+}
+
 android {
     namespace = "com.example.pianoapp"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -18,6 +27,7 @@ android {
     }
 
     kotlinOptions {
+        @Suppress("DEPRECATION")
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
@@ -27,16 +37,34 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 34
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties.getProperty("keyAlias") ?: "pianoapp-key"
+            keyPassword = keystoreProperties.getProperty("keyPassword") ?: "pianoapp123"
+            storeFile = keystoreProperties.getProperty("storeFile")?.let { path -> rootProject.file(path) }
+                ?: file("pianoapp-release-key.jks")
+            storePassword = keystoreProperties.getProperty("storePassword") ?: "pianoapp123"
+        }
     }
 
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
+    }
+
+    // Ensure universal APK (no ABI split)
+    splits {
+        abi {
+            isEnable = false
         }
     }
 }
