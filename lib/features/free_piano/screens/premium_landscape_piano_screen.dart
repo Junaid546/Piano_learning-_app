@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../models/piano_key.dart';
 import '../models/octave_range.dart';
 import '../providers/piano_controller_provider.dart';
@@ -75,6 +76,12 @@ class _PremiumLandscapePianoScreenState
         DeviceOrientation.landscapeRight,
       ]);
       await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
+      );
       _orientationLocked = false;
     } catch (e) {
       debugPrint('Error restoring orientation: $e');
@@ -82,7 +89,8 @@ class _PremiumLandscapePianoScreenState
   }
 
   Future<bool> _onWillPop() async {
-    await _restoreOrientation();
+    // Restore orientation in background
+    _restoreOrientation();
     return true;
   }
 
@@ -240,12 +248,12 @@ class _PremiumLandscapePianoScreenState
   }
 
   void _handleBack(BuildContext context) {
-    // Check if we can pop before attempting
+    // Navigate FIRST while still in landscape mode
+    // Orientation restoration will happen in dispose() automatically
     if (Navigator.of(context).canPop()) {
       Navigator.of(context).pop();
     } else {
-      // If no pages to pop, just restore orientation and exit
-      _restoreOrientation();
+      GoRouter.of(context).go('/');
     }
   }
 

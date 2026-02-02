@@ -274,17 +274,21 @@ class SyncService {
     try {
       final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
 
+      // Query only by userId, then filter in memory to avoid composite index requirement
       final snapshot = await _firestore
           .collection('practice_sessions')
           .where('userId', isEqualTo: userId)
-          .where('startTime', isGreaterThan: thirtyDaysAgo.toIso8601String())
           .get();
 
-      final sessions = snapshot.docs.map((doc) {
-        final data = doc.data();
-        data['sessionId'] = doc.id;
-        return _practiceSessionToSqlite(PracticeSession.fromJson(data));
-      }).toList();
+      final sessions = snapshot.docs
+          .map((doc) {
+            final data = doc.data();
+            data['sessionId'] = doc.id;
+            return PracticeSession.fromJson(data);
+          })
+          .where((session) => session.startTime.isAfter(thirtyDaysAgo))
+          .map(_practiceSessionToSqlite)
+          .toList();
 
       if (sessions.isNotEmpty) {
         await _dbHelper.insertBatch(
