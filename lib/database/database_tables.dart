@@ -62,6 +62,7 @@ class DatabaseTables {
       '''
     CREATE TABLE $tableUserProgress (
       userId TEXT PRIMARY KEY,
+      completedLessonIds TEXT NOT NULL DEFAULT '[]',
       lessonsCompleted INTEGER NOT NULL DEFAULT 0,
       totalLessons INTEGER NOT NULL DEFAULT 0,
       practiceAttempts INTEGER NOT NULL DEFAULT 0,
@@ -71,9 +72,9 @@ class DatabaseTables {
       accuracy REAL NOT NULL DEFAULT 0.0,
       level INTEGER NOT NULL DEFAULT 1,
       xp INTEGER NOT NULL DEFAULT 0,
-      achievementsUnlocked TEXT NOT NULL,
+      achievementsUnlocked TEXT NOT NULL DEFAULT '[]',
       lastPracticeDate TEXT,
-      practiceDates TEXT NOT NULL,
+      practiceDates TEXT NOT NULL DEFAULT '{}',
       lastSyncedAt TEXT NOT NULL
     )
   ''';

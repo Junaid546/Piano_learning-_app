@@ -56,51 +56,58 @@ final achievementsProvider = StreamProvider<List<Achievement>>((ref) async* {
     return;
   }
 
-  final progressSnapshot = await FirebaseFirestore.instance
-      .collection('progress')
-      .doc(user.uid)
-      .get();
-
-  final progress = progressSnapshot.exists
-      ? UserProgress.fromJson(progressSnapshot.data()!)
-      : UserProgress(userId: user.uid);
-
-  // Get all achievements and update with user progress
+  // Get all achievements first (this always works)
   final allAchievements = AchievementsData.getAllAchievements();
-  final updatedAchievements = allAchievements.map((achievement) {
-    final isUnlocked = progress.achievementsUnlocked.contains(achievement.id);
-    int currentProgress = 0;
 
-    // Calculate current progress based on category
-    switch (achievement.category) {
-      case 'lessons':
-        currentProgress = progress.lessonsCompleted;
-        break;
-      case 'practice':
-        currentProgress = progress.practiceAttempts;
-        break;
-      case 'streak':
-        currentProgress = progress.longestStreak;
-        break;
-      case 'accuracy':
-        currentProgress = progress.accuracy.round();
-        break;
-      case 'notes':
-        // This would need to be tracked separately
-        currentProgress = 0;
-        break;
-      case 'time':
-        currentProgress = progress.totalPracticeTime;
-        break;
-    }
+  try {
+    final progressSnapshot = await FirebaseFirestore.instance
+        .collection('progress')
+        .doc(user.uid)
+        .get();
 
-    return achievement.copyWith(
-      currentProgress: currentProgress,
-      isUnlocked: isUnlocked,
-    );
-  }).toList();
+    final progress = progressSnapshot.exists
+        ? UserProgress.fromJson(progressSnapshot.data()!)
+        : UserProgress(userId: user.uid);
 
-  yield updatedAchievements;
+    // Update achievements with user progress
+    final updatedAchievements = allAchievements.map((achievement) {
+      final isUnlocked = progress.achievementsUnlocked.contains(achievement.id);
+      int currentProgress = 0;
+
+      // Calculate current progress based on category
+      switch (achievement.category) {
+        case 'lessons':
+          currentProgress = progress.lessonsCompleted;
+          break;
+        case 'practice':
+          currentProgress = progress.practiceAttempts;
+          break;
+        case 'streak':
+          currentProgress = progress.longestStreak;
+          break;
+        case 'accuracy':
+          currentProgress = progress.accuracy.round();
+          break;
+        case 'notes':
+          currentProgress = 0;
+          break;
+        case 'time':
+          currentProgress = progress.totalPracticeTime;
+          break;
+      }
+
+      return achievement.copyWith(
+        currentProgress: currentProgress,
+        isUnlocked: isUnlocked,
+      );
+    }).toList();
+
+    yield updatedAchievements;
+  } catch (e) {
+    // On error, yield default achievements (all locked)
+    debugPrint('Error loading achievements: $e');
+    yield allAchievements;
+  }
 });
 
 // Progress actions
@@ -270,6 +277,43 @@ class ProgressActions {
         .update({
           'achievementsUnlocked': FieldValue.arrayUnion([achievementId]),
         });
+  }
+
+  /// Mark a lesson as completed for the current user (per-user, not global)
+  Future<void> markLessonCompleted(String lessonId) async {
+    final user = _ref.read(authProvider).firebaseUser;
+    if (user == null) return;
+
+    final progressRef = FirebaseFirestore.instance
+        .collection('progress')
+        .doc(user.uid);
+
+    // Add lesson to completedLessonIds array
+    await progressRef.set({
+      'completedLessonIds': FieldValue.arrayUnion([lessonId]),
+      'lessonsCompleted': FieldValue.increment(1),
+      'xp': FieldValue.increment(50), // XP for completing a lesson
+      'lastLessonCompleted': DateTime.now().toIso8601String(),
+    }, SetOptions(merge: true));
+
+    // Check for new achievements
+    await _checkAchievements();
+  }
+
+  /// Reset lesson progress for the current user (per-user, not global)
+  Future<void> resetLessonProgress(String lessonId) async {
+    final user = _ref.read(authProvider).firebaseUser;
+    if (user == null) return;
+
+    final progressRef = FirebaseFirestore.instance
+        .collection('progress')
+        .doc(user.uid);
+
+    // Remove lesson from completedLessonIds array
+    await progressRef.update({
+      'completedLessonIds': FieldValue.arrayRemove([lessonId]),
+      'lessonsCompleted': FieldValue.increment(-1),
+    });
   }
 }
 

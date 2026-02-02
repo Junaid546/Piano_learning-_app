@@ -1,5 +1,6 @@
 class UserProgress {
   final String userId;
+  final List<String> completedLessonIds; // Per-user lesson completion
   final int lessonsCompleted;
   final int totalLessons;
   final int practiceAttempts;
@@ -15,6 +16,7 @@ class UserProgress {
 
   const UserProgress({
     required this.userId,
+    this.completedLessonIds = const [],
     this.lessonsCompleted = 0,
     this.totalLessons = 0,
     this.practiceAttempts = 0,
@@ -32,6 +34,7 @@ class UserProgress {
   Map<String, dynamic> toJson() {
     return {
       'userId': userId,
+      'completedLessonIds': completedLessonIds,
       'lessonsCompleted': lessonsCompleted,
       'totalLessons': totalLessons,
       'practiceAttempts': practiceAttempts,
@@ -50,6 +53,8 @@ class UserProgress {
   factory UserProgress.fromJson(Map<String, dynamic> json) {
     return UserProgress(
       userId: json['userId'] as String? ?? '',
+      completedLessonIds:
+          List<String>.from(json['completedLessonIds'] as List? ?? []),
       lessonsCompleted: json['lessonsCompleted'] as int? ?? 0,
       totalLessons: json['totalLessons'] as int? ?? 0,
       practiceAttempts: json['practiceAttempts'] as int? ?? 0,
@@ -71,6 +76,7 @@ class UserProgress {
 
   UserProgress copyWith({
     String? userId,
+    List<String>? completedLessonIds,
     int? lessonsCompleted,
     int? totalLessons,
     int? practiceAttempts,
@@ -86,7 +92,10 @@ class UserProgress {
   }) {
     return UserProgress(
       userId: userId ?? this.userId,
-      lessonsCompleted: lessonsCompleted ?? this.lessonsCompleted,
+      completedLessonIds: completedLessonIds ?? this.completedLessonIds,
+      lessonsCompleted: completedLessonIds != null
+          ? completedLessonIds.length
+          : (lessonsCompleted ?? this.lessonsCompleted),
       totalLessons: totalLessons ?? this.totalLessons,
       practiceAttempts: practiceAttempts ?? this.practiceAttempts,
       totalPracticeTime: totalPracticeTime ?? this.totalPracticeTime,

@@ -10,6 +10,7 @@ import '../features/practice/models/practice_session.dart';
 
 /// SyncService - Manages bidirectional sync between Firebase and SQLite
 /// Firebase is the source of truth, SQLite is the cache
+/// IMPORTANT: All user-specific data must be filtered by userId for data isolation
 class SyncService {
   final DatabaseHelper _dbHelper = DatabaseHelper.getInstance();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -135,6 +136,7 @@ class SyncService {
   Map<String, dynamic> _userProgressToSqlite(UserProgress progress) {
     return _dbHelper.addSyncTimestamp({
       'userId': progress.userId,
+      'completedLessonIds': jsonEncode(progress.completedLessonIds),
       'lessonsCompleted': progress.lessonsCompleted,
       'totalLessons': progress.totalLessons,
       'practiceAttempts': progress.practiceAttempts,
@@ -173,6 +175,7 @@ class SyncService {
   UserProgress _sqliteToUserProgress(Map<String, dynamic> row) {
     return UserProgress.fromJson({
       'userId': row['userId'],
+      'completedLessonIds': jsonDecode(row['completedLessonIds'] ?? '[]'),
       'lessonsCompleted': row['lessonsCompleted'],
       'totalLessons': row['totalLessons'],
       'practiceAttempts': row['practiceAttempts'],
@@ -342,6 +345,43 @@ class SyncService {
       debugPrint('✅ Cache cleared');
     } catch (e) {
       debugPrint('❌ Error clearing cache: $e');
+    }
+  }
+
+  /// Clear only the current user's data from cache (for data isolation)
+  Future<void> clearUserCache(String userId) async {
+    try {
+      // Delete user's progress
+      await _dbHelper.delete(
+        DatabaseTables.tableUserProgress,
+        'userId = ?',
+        [userId],
+      );
+
+      // Delete user's preferences
+      await _dbHelper.delete(
+        DatabaseTables.tableUserPreferences,
+        'userId = ?',
+        [userId],
+      );
+
+      // Delete user's practice sessions
+      await _dbHelper.delete(
+        DatabaseTables.tablePracticeSessions,
+        'userId = ?',
+        [userId],
+      );
+
+      // Delete user's cached profile
+      await _dbHelper.delete(
+        DatabaseTables.tableUsers,
+        'id = ?',
+        [userId],
+      );
+
+      debugPrint('✅ User cache cleared for userId: $userId');
+    } catch (e) {
+      debugPrint('❌ Error clearing user cache: $e');
     }
   }
 

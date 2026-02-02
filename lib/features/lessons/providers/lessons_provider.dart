@@ -6,15 +6,27 @@ import '../models/lesson.dart';
 import '../../../database/sync_service.dart';
 import '../../../core/utils/error_handler.dart';
 
-// Provider to fetch all lessons with cache-first pattern
+// Provider to fetch all lessons with user-specific completion status
 final lessonsProvider = StreamProvider.autoDispose<List<Lesson>>((ref) async* {
   final syncService = SyncService();
+
+  // Get user's completed lesson IDs from progress
+  final progress = ref.watch(userProgressProvider);
+  final completedLessonIds = progress.maybeWhen(
+    data: (p) => p.completedLessonIds,
+    orElse: () => <String>[],
+  );
 
   try {
     // 1. Load from cache first (instant UI)
     final cachedLessons = await syncService.loadLessonsFromCache();
     if (cachedLessons.isNotEmpty) {
-      yield cachedLessons;
+      // Merge cached lessons with user's completion status
+      final lessonsWithStatus = cachedLessons.map((lesson) {
+        final isCompleted = completedLessonIds.contains(lesson.id);
+        return lesson.copyWith(isCompleted: isCompleted);
+      }).toList();
+      yield lessonsWithStatus;
     }
 
     // 2. Stream from Firebase and update cache in background
@@ -32,7 +44,13 @@ final lessonsProvider = StreamProvider.autoDispose<List<Lesson>>((ref) async* {
         syncService.updateLessonInCache(lesson);
       }
 
-      yield lessons;
+      // Merge with user's completion status
+      final lessonsWithStatus = lessons.map((lesson) {
+        final isCompleted = completedLessonIds.contains(lesson.id);
+        return lesson.copyWith(isCompleted: isCompleted);
+      }).toList();
+
+      yield lessonsWithStatus;
     }
   } catch (e) {
     // Log error and rethrow with user-friendly message
@@ -116,18 +134,9 @@ class LessonActions {
           final user = _ref.read(authProvider).firebaseUser;
           if (user == null) throw Exception('User not authenticated');
 
-          // Update lesson completion status
-          await FirebaseFirestore.instance
-              .collection('lessons')
-              .doc(lessonId)
-              .update({'isCompleted': true});
-
-          // Use progress actions to update progress
+          // Update user progress with lesson completion (per-user, not global)
           final progressActions = _ref.read(progressActionsProvider);
-          await progressActions.updateProgress(
-            lessonsCompleted: 1,
-            xpGained: 50, // XP for completing a lesson
-          );
+          await progressActions.markLessonCompleted(lessonId);
         },
         maxAttempts: 3,
       );
@@ -138,6 +147,7 @@ class LessonActions {
 
   Future<void> unlockLesson(String lessonId) async {
     try {
+      // Unlock is global (admin action), not per-user
       await FirebaseFirestore.instance
           .collection('lessons')
           .doc(lessonId)
@@ -149,10 +159,9 @@ class LessonActions {
 
   Future<void> resetProgress(String lessonId) async {
     try {
-      await FirebaseFirestore.instance
-          .collection('lessons')
-          .doc(lessonId)
-          .update({'isCompleted': false});
+      // Reset is per-user, not global
+      final progressActions = _ref.read(progressActionsProvider);
+      await progressActions.resetLessonProgress(lessonId);
     } catch (e) {
       rethrow;
     }

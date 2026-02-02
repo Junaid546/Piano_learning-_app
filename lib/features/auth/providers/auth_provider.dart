@@ -155,14 +155,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
             .doc(cred.user!.uid)
             .set(newUser.toJson());
 
-        // Create initial progress document
+        // Create initial progress document for new user
         await _firestore.collection('progress').doc(cred.user!.uid).set({
-          'lessonsCompleted': [],
+          'userId': cred.user!.uid,
+          'completedLessonIds': [],
+          'lessonsCompleted': 0,
+          'totalLessons': 0,
           'practiceAttempts': 0,
           'totalPracticeTime': 0,
           'currentStreak': 0,
+          'longestStreak': 0,
+          'accuracy': 0.0,
+          'level': 1,
+          'xp': 0,
+          'achievementsUnlocked': [],
           'lastPracticeDate': null,
-          'achievements': [],
+          'practiceDates': {},
         });
 
         // Auth state listener will pick up the change, but model might take a moment
@@ -184,9 +192,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> logout() async {
     state = state.copyWith(isLoading: true);
 
-    // Clear SQLite cache on logout
+    // Get current userId before signing out
+    final currentUserId = _auth.currentUser?.uid;
+
+    // Clear SQLite cache for current user on logout
     final syncService = SyncService();
-    await syncService.clearCache();
+    if (currentUserId != null) {
+      await syncService.clearUserCache(currentUserId);
+    } else {
+      await syncService.clearCache();
+    }
 
     await _auth.signOut();
     // Listener will update state
