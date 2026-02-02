@@ -293,7 +293,7 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
         final actualKeyHeight = widget.keyHeight.clamp(120.0, 200.0);
 
         // Build the keyboard content
-        Widget keyboardContent = Container(
+        Widget keyboardContent = SizedBox(
           width: totalWidth,
           height: actualKeyHeight,
           child: Stack(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/constants/app_colors.dart';
 import 'widgets/bottom_nav_bar.dart';
 
 class MainScaffold extends StatelessWidget {
@@ -12,7 +11,7 @@ class MainScaffold extends StatelessWidget {
   int get _currentIndex {
     // Determine current index based on location
     if (location.startsWith('/lessons')) return 1;
-    if (location.startsWith('/practice')) return 2;
+    if (location.startsWith('/free-piano')) return 2;
     if (location.startsWith('/progress')) return 3;
     if (location.startsWith('/profile')) return 4;
     return 0; // Home
@@ -30,7 +29,7 @@ class MainScaffold extends StatelessWidget {
         context.go('/lessons');
         break;
       case 2:
-        context.go('/practice');
+        context.go('/free-piano');
         break;
       case 3:
         context.go('/progress');

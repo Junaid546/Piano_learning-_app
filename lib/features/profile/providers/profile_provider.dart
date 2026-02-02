@@ -173,8 +173,9 @@ class ProfileActions {
           }
         }
 
-        if (downloadUrl == null)
+        if (downloadUrl == null) {
           throw Exception('Failed to get download URL after retries');
+        }
 
         debugPrint('Upload successful. Download URL: $downloadUrl');
 

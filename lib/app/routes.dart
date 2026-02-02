@@ -17,6 +17,7 @@ import '../features/practice/screens/practice_results_screen.dart';
 import '../features/progress/screens/progress_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
 import '../features/profile/screens/edit_profile_screen.dart';
+import '../features/free_piano/screens/premium_landscape_piano_screen.dart';
 
 // Models
 import '../features/practice/models/practice_session.dart';
@@ -210,6 +211,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => _buildSlidePage(
           key: state.pageKey,
           child: const EditProfileScreen(),
+        ),
+      ),
+
+      // ==================== FREE PIANO (Landscape Mode) ====================
+      GoRoute(
+        path: '/free-piano',
+        name: 'free-piano',
+        pageBuilder: (context, state) => _buildFadePage(
+          key: state.pageKey,
+          child: const PremiumLandscapePianoScreen(),
         ),
       ),
     ],

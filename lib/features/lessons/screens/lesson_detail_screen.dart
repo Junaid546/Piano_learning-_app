@@ -201,7 +201,7 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            Icon(
+                            const Icon(
                               Icons.access_time,
                               size: 16,
                               color: AppColors.textSecondaryLight,

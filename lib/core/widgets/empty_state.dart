@@ -117,7 +117,7 @@ class NoAchievementsEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return EmptyState(
+    return const EmptyState(
       icon: Icons.emoji_events_outlined,
       title: 'No Achievements Yet',
       message:

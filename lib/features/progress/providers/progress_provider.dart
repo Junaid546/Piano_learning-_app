@@ -11,7 +11,7 @@ import '../../../database/sync_service.dart';
 final userProgressProvider = StreamProvider<UserProgress>((ref) async* {
   final user = ref.watch(authProvider).firebaseUser;
   if (user == null) {
-    yield UserProgress(userId: '');
+    yield const UserProgress(userId: '');
     return;
   }
 

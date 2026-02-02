@@ -12,7 +12,7 @@ class AudioPlayerService {
 
   // Larger player pool for rapid key presses
   final List<AudioPlayer> _playerPool = [];
-  final int _maxPlayers = 20; // Increased for smoother playback
+  final int _maxPlayers = 32; // Increased for rapid pressing
   int _currentPlayerIndex = 0;
 
   double _volume = 0.8;
@@ -38,9 +38,16 @@ class AudioPlayerService {
       // Create player pool with optimized settings
       for (int i = 0; i < _maxPlayers; i++) {
         final player = AudioPlayer();
-        player.setVolume(_isMuted ? 0.0 : _volume);
-        player.setReleaseMode(ReleaseMode.stop);
-        player.setPlayerMode(PlayerMode.lowLatency); // Low latency for piano
+        
+        // Set mode first before setting source
+        await player.setPlayerMode(PlayerMode.lowLatency);
+        
+        // Set release mode to stop after completion
+        await player.setReleaseMode(ReleaseMode.stop);
+        
+        // Set volume
+        await player.setVolume(_isMuted ? 0.0 : _volume);
+        
         _playerPool.add(player);
       }
 
@@ -137,21 +144,35 @@ class AudioPlayerService {
   /// Internal method to play note without blocking
   void _playNoteInternal(Note note) {
     try {
-      // Get next player from pool (round-robin)
-      final player = _playerPool[_currentPlayerIndex % _maxPlayers];
-      _currentPlayerIndex++;
+      // Find an available player - prefer stopped/completed players
+      AudioPlayer? availablePlayer;
+      for (final player in _playerPool) {
+        final state = player.state;
+        if (state == PlayerState.stopped || 
+            state == PlayerState.completed || 
+            state == PlayerState.disposed) {
+          availablePlayer = player;
+          break;
+        }
+      }
+      
+      // If no available player, use round-robin
+      if (availablePlayer == null) {
+        availablePlayer = _playerPool[_currentPlayerIndex % _maxPlayers];
+        _currentPlayerIndex++;
+        // Force stop on busy player
+        availablePlayer.stop().ignore();
+      }
 
       // Get correct asset path
       final assetPath = _getAssetPath(note.audioAssetPath);
 
-      // Use cached source if available, otherwise create new
-      final source = _audioCache[assetPath] ?? AssetSource(assetPath);
+      // Create source
+      final source = AssetSource(assetPath);
 
-      // Play without awaiting - fire and forget for zero lag
-      player.stop().then((_) {
-        player.play(source).catchError((e) {
-          debugPrint('Error playing note ${note.fullName}: $e');
-        });
+      // Play with low latency mode
+      availablePlayer.play(source, mode: PlayerMode.lowLatency).catchError((e) {
+        debugPrint('Error playing note ${note.fullName}: $e');
       });
     } catch (e) {
       debugPrint('Error in playNote: $e');
@@ -181,14 +202,35 @@ class AudioPlayerService {
 
       if (_isDisposed || _isMuted || !_isInitialized) return;
 
-      final player = _playerPool[_currentPlayerIndex % _maxPlayers];
-      _currentPlayerIndex++;
+      // Find an available player - prefer players that are stopped
+      AudioPlayer? availablePlayer;
+      for (final player in _playerPool) {
+        final state = player.state;
+        // Consider player available if it's stopped or completed
+        if (state == PlayerState.stopped || 
+            state == PlayerState.completed || 
+            state == PlayerState.disposed) {
+          availablePlayer = player;
+          break;
+        }
+      }
+      
+      // If no available player found, use round-robin with force play
+      if (availablePlayer == null) {
+        availablePlayer = _playerPool[_currentPlayerIndex % _maxPlayers];
+        _currentPlayerIndex++;
+        // Force stop and replay on busy player
+        availablePlayer.stop().ignore();
+      }
 
       final assetPath = 'audio/piano/$fileName.mp3';
-      final source = _audioCache[assetPath] ?? AssetSource(assetPath);
+      
+      // Create source
+      final source = AssetSource(assetPath);
 
-      player.stop().then((_) {
-        player.play(source);
+      // Play with error handling
+      availablePlayer.play(source, mode: PlayerMode.lowLatency).catchError((e) {
+        debugPrint('Error playing note $noteName: $e');
       });
     } catch (e) {
       debugPrint('Error playing note $noteName: $e');

@@ -132,7 +132,7 @@ class LessonCard extends StatelessWidget {
                         Row(
                           children: [
                             // Duration
-                            Icon(
+                            const Icon(
                               Icons.access_time_rounded,
                               size: 14,
                               color: AppColors.textTertiary,
@@ -201,9 +201,9 @@ class LessonCard extends StatelessWidget {
                     horizontal: 12,
                     vertical: 6,
                   ),
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.successGreen,
-                    borderRadius: const BorderRadius.only(
+                    borderRadius: BorderRadius.only(
                       topRight: Radius.circular(20),
                       bottomLeft: Radius.circular(20),
                     ),

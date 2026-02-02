@@ -10,12 +10,12 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      colorScheme: ColorScheme.light(
+      colorScheme: const ColorScheme.light(
         primary: AppColors.primaryPurple,
         secondary: AppColors.secondaryPink,
         tertiary: AppColors.accentGold,
         surface: AppColors.surfaceLight,
-        surfaceVariant: AppColors.surfaceVariantLight,
+        surfaceContainerHighest: AppColors.surfaceVariantLight,
         error: AppColors.errorRed,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
@@ -23,7 +23,6 @@ class AppTheme {
         onSurface: AppColors.textPrimaryLight,
         onSurfaceVariant: AppColors.textSecondaryLight,
         onError: Colors.white,
-        background: AppColors.backgroundLight,
       ),
       scaffoldBackgroundColor: AppColors.backgroundLight,
       cardColor: AppColors.cardLight,
@@ -173,12 +172,12 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      colorScheme: ColorScheme.dark(
+      colorScheme: const ColorScheme.dark(
         primary: AppColors.primaryPurple,
         secondary: AppColors.secondaryPink,
         tertiary: AppColors.accentGold,
         surface: AppColors.surfaceDark,
-        surfaceVariant: AppColors.surfaceVariantDark,
+        surfaceContainerHighest: AppColors.surfaceVariantDark,
         error: AppColors.errorRed,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
@@ -186,7 +185,6 @@ class AppTheme {
         onSurface: AppColors.textPrimaryDark,
         onSurfaceVariant: AppColors.textSecondaryDark,
         onError: Colors.white,
-        background: AppColors.backgroundDark,
       ),
       scaffoldBackgroundColor: AppColors.backgroundDark,
       cardColor: AppColors.cardDark,

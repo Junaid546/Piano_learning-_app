@@ -84,25 +84,21 @@ class _CustomButtonState extends State<CustomButton>
       builder: (context, child) {
         return Transform.scale(scale: _scaleAnimation.value, child: child);
       },
-      child: GestureDetector(
-        onTapDown: _onTapDown,
-        onTapUp: _onTapUp,
-        onTapCancel: _onTapCancel,
-        onTap: isEnabled ? widget.onPressed : null,
-        child: Container(
-          width: widget.width,
-          height: widget.height,
-          decoration: _getDecoration(isEnabled),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: isEnabled ? widget.onPressed : null,
-              borderRadius: BorderRadius.circular(widget.borderRadius),
-              child: Center(
-                child: widget.isLoading
-                    ? _buildLoader()
-                    : _buildContent(isEnabled),
-              ),
+      child: Container(
+        width: widget.width,
+        height: widget.height,
+        decoration: _getDecoration(isEnabled),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTapDown: isEnabled ? _onTapDown : null,
+            onTapUp: isEnabled ? _onTapUp : null,
+            onTapCancel: isEnabled ? _onTapCancel : null,
+            onTap: isEnabled ? widget.onPressed : null,
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            child: Center(
+              child:
+                  widget.isLoading ? _buildLoader() : _buildContent(isEnabled),
             ),
           ),
         ),
