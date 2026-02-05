@@ -27,8 +27,8 @@ class LessonsListScreen extends ConsumerWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
                   colors: [AppColors.primaryPurple, AppColors.primaryLight],
                 ),
                 shape: BoxShape.circle,
@@ -166,7 +166,7 @@ class LessonsListScreen extends ConsumerWidget {
                       const SizedBox(height: 8),
                       Text(
                         '${stats['percentage']}% Complete',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
                         ),
@@ -198,7 +198,7 @@ class LessonsListScreen extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 48, color: AppColors.errorRed),
+                const Icon(Icons.error_outline, size: 48, color: AppColors.errorRed),
                 const SizedBox(height: 16),
                 Text('Error loading lessons', style: AppTextStyles.titleMedium),
                 const SizedBox(height: 8),

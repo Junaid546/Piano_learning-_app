@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/piano_controller_provider.dart';
 import '../widgets/piano_controls_bar.dart';
 import '../widgets/full_piano_keyboard.dart';
 import '../widgets/sound_visualizer.dart';

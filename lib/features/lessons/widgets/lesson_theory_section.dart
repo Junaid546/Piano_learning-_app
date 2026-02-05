@@ -143,11 +143,11 @@ class _LessonTheorySectionState extends State<LessonTheorySection>
                             color: AppColors.warningOrange.withOpacity(0.15),
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: Row(
+                          child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.lightbulb, color: AppColors.warningOrange, size: 12),
-                              const SizedBox(width: 4),
+                              Icon(Icons.lightbulb, color: AppColors.warningOrange, size: 12),
+                              SizedBox(width: 4),
                               Text(
                                 'Tips',
                                 style: TextStyle(

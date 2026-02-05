@@ -61,7 +61,7 @@ class FullPianoKeyboard extends ConsumerWidget {
 
   double _calculateWhiteKeyWidth(double availableWidth, OctaveRange range) {
     final numOctaves = range.numOctaves;
-    final minWhiteKeyWidth = 40.0;
+    const minWhiteKeyWidth = 40.0;
     final calculatedWidth = availableWidth / (numOctaves * 7);
     return calculatedWidth.clamp(minWhiteKeyWidth, 70.0);
   }
@@ -168,7 +168,6 @@ class _WhiteKeyWidget extends StatefulWidget {
   final VoidCallback onRelease;
 
   const _WhiteKeyWidget({
-    super.key,
     required this.pianoKey,
     required this.isPressed,
     required this.width,
@@ -294,7 +293,6 @@ class _BlackKeyWidget extends StatefulWidget {
   final VoidCallback onRelease;
 
   const _BlackKeyWidget({
-    super.key,
     required this.pianoKey,
     required this.isPressed,
     required this.width,

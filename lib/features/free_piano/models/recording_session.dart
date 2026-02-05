@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'dart:math' as math;
 
 /// Represents a recording session for the piano.
 /// This model is designed for future recording feature implementation.

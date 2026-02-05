@@ -29,7 +29,7 @@ class _PremiumControlsBarState extends ConsumerState<PremiumControlsBar>
     with SingleTickerProviderStateMixin {
   late AnimationController _volumeController;
   bool _volumeExpanded = false;
-  double _previousVolume = 0.8;
+  final double _previousVolume = 0.8;
 
   @override
   void initState() {

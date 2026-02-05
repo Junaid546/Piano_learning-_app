@@ -215,7 +215,7 @@ class _BarsPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final barCount = 20;
+    const barCount = 20;
     final barWidth = size.width / barCount - 4;
     final maxBarHeight = size.height * 0.8;
 

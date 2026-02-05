@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/piano_key.dart';
-import '../models/piano_settings.dart';
-import '../providers/piano_controller_provider.dart';
 
 /// Premium photorealistic white key widget with ivory texture, shadows, and glow effects.
 class PremiumWhiteKey extends ConsumerStatefulWidget {

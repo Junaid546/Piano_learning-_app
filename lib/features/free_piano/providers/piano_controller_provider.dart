@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/piano_key.dart';
 import '../models/octave_range.dart';
-import '../models/piano_settings.dart';
 import '../../../features/piano/providers/audio_service_provider.dart';
 import '../../../features/piano/services/audio_player_service.dart';
 

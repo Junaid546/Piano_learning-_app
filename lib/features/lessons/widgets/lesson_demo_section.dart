@@ -139,7 +139,7 @@ class _LessonDemoSectionState extends State<LessonDemoSection> {
                 ),
                 child: Text(
                   '${_playbackSpeed}x',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.infoBlue,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -236,7 +236,7 @@ class _LessonDemoSectionState extends State<LessonDemoSection> {
                 child: DropdownButton<double>(
                   value: _playbackSpeed,
                   underline: const SizedBox(),
-                  icon: Icon(Icons.speed, color: AppColors.infoBlue, size: 16),
+                  icon: const Icon(Icons.speed, color: AppColors.infoBlue, size: 16),
                   dropdownColor: surfaceColor,
                   items: const [
                     DropdownMenuItem(value: 0.5, child: Text('0.5x', style: TextStyle(fontSize: 12))),

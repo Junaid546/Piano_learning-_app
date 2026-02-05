@@ -363,8 +363,8 @@ class _SettingsPanelState extends ConsumerState<SettingsPanel> {
           const SizedBox(width: 8),
           Text(
             title,
-            style: TextStyle(
-              color: const Color(0xFF7C4DFF),
+            style: const TextStyle(
+              color: Color(0xFF7C4DFF),
               fontSize: 12,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,

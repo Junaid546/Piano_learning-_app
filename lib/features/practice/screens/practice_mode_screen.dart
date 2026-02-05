@@ -434,7 +434,7 @@ class _PracticeModeScreenState extends ConsumerState<PracticeModeScreen>
                                       onPressed: _endSession,
                                       style: OutlinedButton.styleFrom(
                                         padding: const EdgeInsets.symmetric(vertical: 12),
-                                        side: BorderSide(color: AppColors.primaryPurple),
+                                        side: const BorderSide(color: AppColors.primaryPurple),
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(12),
                                         ),

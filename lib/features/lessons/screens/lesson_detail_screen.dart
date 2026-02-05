@@ -142,11 +142,11 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Row(
+            content: const Row(
               children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 12),
-                const Text('Lesson completed! 🎹'),
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 12),
+                Text('Lesson completed! 🎹'),
               ],
             ),
             backgroundColor: AppColors.successGreen,
@@ -269,7 +269,7 @@ class _LessonDetailScreenState extends ConsumerState<LessonDetailScreen> {
                                   margin: const EdgeInsets.only(top: 3),
                                   width: 18,
                                   height: 18,
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     color: AppColors.primaryPurple,
                                     shape: BoxShape.circle,
                                   ),
