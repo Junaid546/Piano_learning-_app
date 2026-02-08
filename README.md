@@ -687,12 +687,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Credits
 
 ### Development
-- **Lead Developer**: Your Name
-- **UI/UX Design**: Designer Name
+- **Lead Developer**: Junaid Tahir
+- **UI/UX Design**: Junaid Tahir
 
-### Assets
-- **Piano Sounds**: [Source of piano samples]
-- **Lottie Animations**: [Animation sources]
 
 ### Open Source Libraries
 
@@ -712,7 +709,7 @@ If you have any questions or need help, please:
 
 1. Check the [Documentation](docs/)
 2. Open an [Issue](issues/)
-3. Email: support@pianoapp.com
+3. Email: junaidt950@gmail.com
 
 ---
 
