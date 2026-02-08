@@ -26,6 +26,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String _appVersion = '';
+  bool _isDeleting = false;
 
   @override
   void initState() {
@@ -700,9 +701,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   void _showDeleteAccountDialog() {
+    final navigator = Navigator.of(context);
+    
     showDialog(
       context: context,
-      builder: (context) => Dialog(
+      builder: (dialogContext) => Dialog(
         backgroundColor: Colors.transparent,
         child: GlassContainer(
           borderRadius: BorderRadius.circular(24),
@@ -744,28 +747,40 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 label: 'Delete Forever',
                 color: AppColors.errorRed,
                 icon: Icons.delete_forever,
-                onPressed: () async {
-                  Navigator.pop(context);
-                  try {
-                    await ref.read(profileActionsProvider).deleteAccount();
-                    if (mounted) {
-                      context.go('/login');
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Error: $e'),
-                          backgroundColor: AppColors.errorRed,
-                        ),
-                      );
-                    }
-                  }
-                },
+                isLoading: _isDeleting,
+                onPressed: _isDeleting
+                    ? null
+                    : () async {
+                        setState(() => _isDeleting = true);
+                        navigator.pop(); // Close dialog first
+                        
+                        try {
+                          await ref.read(profileActionsProvider).deleteAccount();
+                          
+                          if (mounted) {
+                            // Use delayed navigation to ensure context is valid
+                            Future.delayed(const Duration(milliseconds: 100), () {
+                              if (mounted) {
+                                context.go('/login');
+                              }
+                            });
+                          }
+                        } catch (e) {
+                          setState(() => _isDeleting = false);
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Error: $e'),
+                                backgroundColor: AppColors.errorRed,
+                              ),
+                            );
+                          }
+                        }
+                      },
               ),
               const SizedBox(height: 12),
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => navigator.pop(),
                 child: const Text('Cancel'),
               ),
             ],
