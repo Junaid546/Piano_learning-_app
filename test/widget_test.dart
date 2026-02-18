@@ -10,14 +10,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:pianoapp/app/app.dart';
+import 'package:melodify/app/app.dart';
 
 void main() {
   testWidgets('App launches and shows Home Screen', (
     WidgetTester tester,
   ) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const ProviderScope(child: PianoApp()));
+    await tester.pumpWidget(const ProviderScope(child: MelodifyApp()));
     await tester.pumpAndSettle();
 
     // Verify that our home screen is present.

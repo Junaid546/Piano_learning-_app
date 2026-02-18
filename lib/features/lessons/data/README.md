@@ -1,6 +1,6 @@
 # Lessons Seed Data
 
-This file contains initial lesson data for the Learn Piano App.
+This file contains initial lesson data for the Melodify app.
 
 ## How to Add to Firestore
 

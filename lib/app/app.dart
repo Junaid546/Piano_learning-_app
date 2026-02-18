@@ -4,8 +4,8 @@ import '../core/theme/app_theme.dart';
 import '../core/providers/theme_provider.dart';
 import 'routes.dart';
 
-class PianoApp extends ConsumerWidget {
-  const PianoApp({super.key});
+class MelodifyApp extends ConsumerWidget {
+  const MelodifyApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -13,7 +13,7 @@ class PianoApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp.router(
-      title: 'Melodify - Learn Piano',
+      title: 'Melodify',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

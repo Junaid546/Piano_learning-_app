@@ -7,4 +7,4 @@ class AssetPaths {
 
   // Example paths
   // static const String logo = '$_images/logo.png';
-}
+ 

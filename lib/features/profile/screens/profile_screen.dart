@@ -49,16 +49,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     // Use firebase user as fallback when userModel is still loading
     final firebaseUser = userAsync.firebaseUser;
-    if (firebaseUser == null) {
+    final isGuest = userAsync.isGuest;
+
+    // Handle guest mode - no firebaseUser but isGuest is true
+    if (firebaseUser == null && !isGuest) {
       return const Scaffold(body: Center(child: LoadingIndicator()));
     }
 
     // Create a display user - either from userModel or fallback from firebase user
     final displayName =
-        userAsync.userModel?.displayName ?? firebaseUser.displayName ?? 'User';
-    final email = userAsync.userModel?.email ?? firebaseUser.email ?? '';
+        userAsync.userModel?.displayName ?? firebaseUser?.displayName ?? (isGuest ? 'Guest' : 'User');
+    final email = userAsync.userModel?.email ?? firebaseUser?.email ?? (isGuest ? 'guest@example.com' : '');
     final profileImageUrl =
-        userAsync.userModel?.profileImageUrl ?? firebaseUser.photoURL;
+        userAsync.userModel?.profileImageUrl ?? firebaseUser?.photoURL;
     final memberSince = userAsync.userModel?.createdAt ?? DateTime.now();
 
     return Scaffold(
@@ -450,6 +453,83 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildAccountSection() {
+    final authState = ref.watch(authProvider);
+    final isGuest = authState.isGuest;
+
+    // Guest mode: Show create account option
+    if (isGuest) {
+      return SettingsSection(
+        title: 'Account',
+        icon: Icons.account_circle,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.primaryPurple.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryPurple.withValues(alpha: 0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.person_add,
+                        color: AppColors.primaryPurple,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Create Account',
+                            style: AppTextStyles.titleMedium.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            'Sign up to save your progress',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.textSecondaryLight,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => context.go('/signup'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryPurple,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text('Sign Up'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    // Regular user: Show account settings
     return SettingsSection(
       title: 'Account',
       icon: Icons.account_circle,
@@ -559,16 +639,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildLogoutSection() {
+    final authState = ref.watch(authProvider);
+    final isGuest = authState.isGuest;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
       child: SizedBox(
         width: double.infinity,
         child: ElevatedButton.icon(
-          onPressed: () => _showLogoutDialog(),
-          icon: const Icon(Icons.logout),
-          label: const Text('Logout'),
+          onPressed: () => isGuest ? _showExitGuestDialog() : _showLogoutDialog(),
+          icon: Icon(isGuest ? Icons.login : Icons.logout),
+          label: Text(isGuest ? 'Exit Guest Mode' : 'Logout'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red,
+            backgroundColor: isGuest ? AppColors.primaryPurple : Colors.red,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
@@ -576,6 +659,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // Exit guest mode dialog
+  void _showExitGuestDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Exit Guest Mode?'),
+        content: const Text(
+          'You will be returned to the login screen. Your local progress will be saved.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Stay as Guest'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await ref.read(authProvider.notifier).exitGuestMode();
+              if (mounted) context.go('/login');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Exit'),
+          ),
+        ],
       ),
     );
   }

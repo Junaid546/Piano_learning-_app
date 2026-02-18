@@ -1,4 +1,4 @@
-# 🎹 PianoApp
+# 🎹 Melodify
 
 A feature-rich piano learning application built with Flutter and Riverpod for state management. This app provides an interactive piano experience with audio feedback, lesson progression, achievement systems, and gamification elements to make learning piano fun and engaging.
 
@@ -11,7 +11,7 @@ A feature-rich piano learning application built with Flutter and Riverpod for st
 
 ## 📱 App Overview
 
-PianoApp is designed to help users learn piano in an interactive and gamified way. Whether you're a complete beginner or an advanced player looking to practice, PianoApp provides the tools you need to succeed.
+Melodify is designed to help users learn piano in an interactive and gamified way. Whether you're a complete beginner or an advanced player looking to practice, Melodify provides the tools you need to succeed.
 
 ### 🎯 Target Audience
 - **Beginners**: Starting their piano journey with structured lessons
@@ -162,7 +162,7 @@ flutter_local_notifications →  Reminders
 ### Project Structure
 
 ```
-pianoapp/
+melodify/
 ├── android/                  # Android native code
 │   ├── app/
 │   │   ├── build.gradle.kts # App-level build configuration
@@ -370,7 +370,7 @@ This app follows the **Feature-Based Architecture** with **Riverpod** for state 
 │  ┌───────────────────┐    ┌─────────────────────────┐  │
 │  │   Local Storage   │    │    Remote Storage       │  │
 │  │  (Hive, SQLite,   │    │  (Firebase Firestore,   │  │
-│  │   SharedPrefs)    │    │   Firebase Storage)     │  │
+│  │   SharedPrefs)    │    │   Firebase Storage)    │  │
 │  └───────────────────┘    └─────────────────────────┘  │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -400,7 +400,7 @@ final pianoProvider = StateNotifierProvider<PianoNotifier, PianoState>((ref) {
 ```
 User Action → UI Widget → Riverpod Provider → Service → Data Source
               ←           ←                 ←          ←
-           State Update   UI Rebuild        Response   Result
+           State Update   UI BUILD        Response   Result
 ```
 
 ---
@@ -466,8 +466,8 @@ flutter doctor
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/pianoapp.git
-cd pianoapp
+git clone https://github.com/yourusername/melodify.git
+cd melodify
 
 # Install dependencies
 flutter pub get
@@ -484,12 +484,12 @@ flutter pub run build_runner build
 
 2. **Add Android App**
    - Click the Android icon to add an Android app
-   - Enter your package name: `com.example.pianoapp`
+   - Enter your package name: `com.example.melodify`
    - Download `google-services.json` and place it in `android/app/`
 
 3. **Add iOS App** (Mac only)
    - Click the iOS icon to add an iOS app
-   - Enter your bundle ID: `com.example.pianoapp`
+   - Enter your bundle ID: `com.example.melodify`
    - Download `GoogleService-Info.plist` and place it in `ios/Runner/`
 
 4. **Enable Authentication**
@@ -498,183 +498,149 @@ flutter pub run build_runner build
 
 5. **Enable Firestore**
    - Go to "Firestore Database" in Firebase Console
-   - Create a database (start in test mode for development)
+   - Create a database in test mode (for development) or production mode (for production)
 
-6. **Enable Storage** (optional)
+6. **Enable Storage**
    - Go to "Storage" in Firebase Console
-   - Start in test mode for development
+   - Enable storage for storing user images and files
 
-### Step 4: Environment Configuration
-
-Create a `.env` file in the project root (optional):
-
-```env
-# Firebase config (optional, using google-services.json instead)
-FIREBASE_API_KEY=your_api_key
-FIREBASE_PROJECT_ID=your_project_id
-```
-
-### Step 5: Run the App
+### Step 4: Run the App
 
 ```bash
-# Run on connected device/emulator
+# Run in debug mode
 flutter run
 
-# Run in debug mode with hot reload
-flutter run --debug
+# Run in release mode
+flutter run --release
 
-# Run with specific device
-flutter run -d chrome        # Web
-flutter run -d windows       # Windows
-flutter run -d ios           # iOS simulator
-flutter run -d macos         # macOS
+# Build for Android
+flutter build apk
+
+# Build for iOS
+flutter build ios
 ```
 
 ---
 
-## 🏗️ Build Instructions
+## 📁 Project Structure Overview
 
-### Android APK (Release)
+### Core Layer (`lib/core/`)
 
-```bash
-# Clean previous builds
-flutter clean
+The core layer contains shared utilities and configurations:
 
-# Get dependencies
-flutter pub get
-
-# Build release APK
-flutter build apk --release
-
-# APK location: build/app/outputs/flutter-apk/app-release.apk
+```
+lib/core/
+├── constants/     # App-wide constants (colors, dimensions, text styles)
+├── data/         # Sample data and seed data
+├── models/       # Shared data models
+├── providers/    # Global providers (theme, app config)
+├── services/     # Global services (notifications, Firebase)
+├── theme/        # App theming
+├── utils/        # Utility functions (helpers, validators)
+└── widgets/      # Shared/custom UI components
 ```
 
-### Android App Bundle (Play Store)
+### Features Layer (`lib/features/`)
 
-```bash
-# Clean and get dependencies
-flutter clean
-flutter pub get
+Each feature is a self-contained module:
 
-# Build app bundle
-flutter build appbundle --release
-
-# Bundle location: build/app/outputs/bundle/release/app-release.aab
+```
+lib/features/
+├── auth/         # Authentication (login, signup, splash)
+├── home/         # Home screen and dashboard
+├── lessons/      # Lessons and tutorials
+├── piano/        # Piano keyboard and audio
+├── practice/     # Practice modes and exercises
+├── profile/      # User profile and settings
+└── progress/     # Progress tracking and achievements
 ```
 
-### iOS (Release)
+### Database Layer (`lib/database/`)
 
-```bash
-# Clean and get dependencies
-flutter clean
-flutter pub get
+Local data storage:
 
-# Build iOS release
-flutter build ios --release
-
-# Open in Xcode for signing and submission
-open ios/Runner.xcworkspace
+```
+lib/database/
+├── database_helper.dart   # Main database interface
+├── database_tables.dart   # Table definitions
+└── sync_service.dart      # Cloud sync service
 ```
 
-### Web (Release)
+### Services Layer (`lib/services/`)
 
-```bash
-# Clean and get dependencies
-flutter clean
-flutter pub get
+Global services:
 
-# Build for web
-flutter build web --release
-
-# Output: build/web/
 ```
-
-### Windows (Release)
-
-```bash
-flutter clean
-flutter pub get
-flutter build windows --release
+lib/services/
+├── audio_service.dart     # Audio playback
+├── firebase_service.dart   # Firebase operations
+└── storage_service.dart    # File storage
 ```
 
 ---
 
 ## 🧪 Testing
 
+### Unit Testing
+
 ```bash
 # Run unit tests
 flutter test
 
-# Run widget tests
-flutter test --widget
-
-# Run integration tests
-flutter test integration_test
-
-# Run tests with coverage
+# Run unit tests with coverage
 flutter test --coverage
-
-# Generate coverage report (requires lcov)
-genhtml coverage/lcov.info -o coverage/html
-open coverage/html/index.html
 ```
 
----
-
-## 🔐 Code Signing
-
-### Keystore Setup
-
-The app uses a release keystore for signing release builds. The configuration is stored in `android/keystore.properties`.
-
-**Keystore Location**: `android/app/pianoapp-release-key.jks`
-
-**Keystore Properties**:
-```properties
-storePassword=pianoapp123
-keyPassword=pianoapp123
-keyAlias=pianoapp-key
-storeFile=pianoapp-release-key.jks
-```
-
-### ⚠️ Security Warnings
-
-1. **Never commit keystore files to version control**
-2. **Use strong passwords** for production keystores
-3. **Consider Google Play Signing** for production releases
-4. **Store passwords securely** using environment variables or CI/CD secrets
-
-### Generate New Keystore
+### Widget Testing
 
 ```bash
-keytool -genkeypair -v \
-  -storetype PKCS12 \
-  -keyalg RSA \
-  -keysize 2048 \
-  -validity 10000 \
-  -keystore android/app/pianoapp-release-key.jks \
-  -alias pianoapp-key \
-  -storepass YOUR_STRONG_PASSWORD \
-  -keypass YOUR_STRONG_PASSWORD \
-  -dname "CN=Your Name, OU=Development, O=Your Organization, L=City, ST=State, C=US"
+# Run widget tests
+flutter test
+```
+
+### Integration Testing
+
+```bash
+# Run integration tests
+flutter test integration_test/
 ```
 
 ---
 
-## 📈 Future Enhancements
+## 📦 Building for Release
 
-See [TODO.md](TODO.md) for a detailed list of planned features and enhancements.
+### Android
 
-### Planned Features
+```bash
+# Generate keystore (first time only)
+keytool -genkey -v -keystore android/app/melodify-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias melodify-key
 
-- 🎹 **MIDI Keyboard Support**: Connect external MIDI keyboards
-- 🎵 **Song Library**: Learn to play popular songs
-- 👥 **Multiplayer Challenges**: Compete with friends
-- 🤝 **Social Features**: Share achievements, add friends
-- 🎸 **More Instruments**: Guitar, drums, and more
-- 🤖 **AI Feedback**: Real-time playing analysis
-- 📊 **Detailed Analytics**: Advanced progress tracking
-- 🌐 **Multi-language**: Support for more languages
+# Build release APK
+flutter build apk --release
+
+# Build App Bundle (recommended for Play Store)
+flutter build appbundle --release
+```
+
+### iOS
+
+```bash
+# Build for release
+flutter build ipa
+
+# Or build for simulator testing
+flutter build ios --simulator
+```
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ---
 
@@ -684,44 +650,24 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 🙏 Credits
+## 🙏 Acknowledgments
 
-### Development
-- **Lead Developer**: Your Name
-- **UI/UX Design**: Designer Name
-
-### Assets
-- **Piano Sounds**: [Source of piano samples]
-- **Lottie Animations**: [Animation sources]
-
-### Open Source Libraries
-
-| Library | Version | License |
-|---------|---------|---------|
-| flutter_riverpod | 2.4.0 | MIT |
-| firebase_core | 2.24.0 | Apache 2.0 |
-| audioplayers | 5.2.1 | MIT |
-| go_router | 13.0.0 | MIT |
-| fl_chart | 0.66.0 | MIT |
+- [Flutter](https://flutter.dev/) - UI framework
+- [Riverpod](https://riverpod.dev/) - State management
+- [Firebase](https://firebase.google.com/) - Backend services
+- [audioplayers](https://pub.dev/packages/audioplayers) - Audio playback
+- [go_router](https://pub.dev/packages/go_router) - Navigation
 
 ---
 
 ## 📞 Support
 
-If you have any questions or need help, please:
-
-1. Check the [Documentation](docs/)
-2. Open an [Issue](issues/)
-3. Email: support@pianoapp.com
+For questions about releases or to report issues:
+- Create an [Issue](https://github.com/yourusername/melodify/issues)
+- Email: support@melodify.com
 
 ---
 
-<div align="center">
-
-**Built with ❤️ using Flutter and Riverpod**
-
-[![Flutter](https://img.shields.io/badge/Flutter-3.10.4-blue?logo=flutter)](https://flutter.dev)
-[![Riverpod](https://img.shields.io/badge/Riverpod-2.4.0-green)](https://riverpod.dev)
-[![Firebase](https://img.shields.io/badge/Firebase-Enabled-orange)](https://firebase.google.com)
-
-</div>
+<p align="center">
+  Made with ❤️ for piano learners everywhere
+</p>

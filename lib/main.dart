@@ -7,7 +7,7 @@ import 'services/firebase_service.dart';
 import 'database/database_helper.dart';
 import 'features/piano/providers/audio_service_provider.dart';
 
-/// Main entry point for the PianoApp application.
+/// Main entry point for the Melodify application.
 ///
 /// This function initializes all required services before starting the app:
 /// 1. Database initialization (SQLite for local storage)
@@ -49,7 +49,7 @@ void main() async {
   runApp(
     UncontrolledProviderScope(
       container: container,
-      child: const PianoApp(),
+      child: const MelodifyApp(),
     ),
   );
 }

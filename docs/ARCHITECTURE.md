@@ -1,6 +1,6 @@
-# PianoApp Architecture Documentation
+# Melodify Architecture Documentation
 
-This document provides a detailed explanation of PianoApp's architecture, design patterns, and implementation details.
+This document provides a detailed explanation of Melodify's architecture, design patterns, and implementation details.
 
 ## 📋 Table of Contents
 
@@ -19,7 +19,7 @@ This document provides a detailed explanation of PianoApp's architecture, design
 
 ## Overview
 
-PianoApp is a cross-platform piano learning application built with Flutter. It follows modern architectural best practices to ensure scalability, maintainability, and testability.
+Melodify is a cross-platform piano learning application built with Flutter. It follows modern architectural best practices to ensure scalability, maintainability, and testability.
 
 ### Key Design Goals
 
@@ -37,7 +37,7 @@ PianoApp is a cross-platform piano learning application built with Flutter. It f
 
 ### Feature-Based Architecture
 
-PianoApp uses a **Feature-Based Architecture** where the app is divided into independent features. Each feature is self-contained and includes all necessary components:
+Melodify uses a **Feature-Based Architecture** where the app is divided into independent features. Each feature is self-contained and includes all necessary components:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -63,7 +63,7 @@ PianoApp uses a **Feature-Based Architecture** where the app is divided into ind
 
 ### Layered Architecture
 
-Within each feature and at the app level, PianoApp follows a layered approach:
+Within each feature and at the app level, Melodify follows a layered approach:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -95,7 +95,7 @@ Within each feature and at the app level, PianoApp follows a layered approach:
 ### Root Level
 
 ```
-pianoapp/
+melodify/
 ├── android/          # Android native configuration
 ├── assets/           # Static assets (audio, images, animations)
 ├── docs/             # Documentation files
@@ -156,7 +156,7 @@ features/[feature_name]/
 
 ### Riverpod Implementation
 
-PianoApp uses **Riverpod 2.4.0** for state management. Riverpod was chosen for its:
+Melodify uses **Riverpod 2.4.0** for state management. Riverpod was chosen for its:
 
 - **Compile-time safety**: No runtime errors from missing providers
 - **Testability**: Easy to mock and test providers
@@ -277,7 +277,7 @@ final progressStreamProvider = StreamProvider<UserProgress>((ref) {
 
 ### Unidirectional Data Flow
 
-PianoApp follows unidirectional data flow for predictable state management:
+Melodify follows unidirectional data flow for predictable state management:
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
@@ -488,7 +488,7 @@ class AudioPlayerService {
 
 ### Routing with go_router
 
-PianoApp uses **go_router** for declarative routing:
+Melodify uses **go_router** for declarative routing:
 
 ```dart
 // routes.dart
@@ -557,10 +557,10 @@ go_router supports deep linking out of the box:
 // Android deep link
 Intent intent = Intent()
   ..action = Intent.ACTION_VIEW
-  ..data = Uri.parse('pianoapp://home/piano');
+  ..data = Uri.parse('melodify://home/piano');
 
 // Web URL
-// https://pianoapp.com/home/piano
+// https://melodify.com/home/piano
 ```
 
 ---
@@ -569,7 +569,7 @@ Intent intent = Intent()
 
 ### Multi-Layer Storage
 
-PianoApp uses multiple storage solutions based on data characteristics:
+Melodify uses multiple storage solutions based on data characteristics:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -786,7 +786,7 @@ void main() {
 
 ## Conclusion
 
-PianoApp's architecture is designed for:
+Melodify's architecture is designed for:
 
 1. **Scalability**: Easy to add new features
 2. **Maintainability**: Clean, well-organized code

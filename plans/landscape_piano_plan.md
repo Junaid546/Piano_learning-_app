@@ -1,7 +1,7 @@
 # Landscape Piano Screen Implementation Plan
 
 ## Overview
-Create a professional, full-featured landscape piano playing screen for the Learn Piano App. Focus on performance optimization first, with 3-4 octaves and scrollable keyboard, plus both wave and bars visualizer types.
+Create a professional, full-featured landscape piano playing screen for the Melodify app. Focus on performance optimization first, with 3-4 octaves and scrollable keyboard, plus both wave and bars visualizer types.
 
 ## Architecture Overview
 

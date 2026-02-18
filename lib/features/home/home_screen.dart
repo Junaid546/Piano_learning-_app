@@ -47,12 +47,64 @@ class HomeScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Guest mode banner
+                    if (ref.watch(authProvider).isGuest)
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryPurple.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.primaryPurple.withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryPurple.withValues(alpha: 0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.info_outline,
+                                color: AppColors.primaryPurple,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Sign up to save your progress and unlock all features',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: isDarkMode
+                                      ? AppColors.textPrimaryDark
+                                      : AppColors.textPrimaryLight,
+                                ),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => context.go('/signup'),
+                              child: Text(
+                                'Sign Up',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: AppColors.primaryPurple,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ).slideUpFade(delay: AppAnimations.staggerLow),
+
+                    const SizedBox(height: 24),
+
                     // 1. Header
                     WelcomeHeader(
                       userName: user?.displayName ?? 'Pianist',
                       profileImageUrl: user?.profileImageUrl,
                       onProfileTap: () {
-                        context.push('/profile');
+                        context.go('/profile');
                       },
                     ).slideUpFade(delay: AppAnimations.staggerLow),
                     const SizedBox(height: 32),
@@ -102,7 +154,7 @@ class HomeScreen extends ConsumerWidget {
                       icon: Icons.piano,
                       color: AppColors.secondaryPink,
                       onTap: () {
-                        context.go('/practice');
+                        context.push('/practice');
                       },
                     ).slideUpFade(delay: AppAnimations.slow),
                     const SizedBox(height: 100), // Bottom padding for nav bar

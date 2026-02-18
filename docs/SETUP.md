@@ -1,6 +1,6 @@
-# PianoApp Setup Guide
+# Melodify Setup Guide
 
-This guide provides step-by-step instructions for setting up the PianoApp development environment.
+This guide provides step-by-step instructions for setting up the Melodify development environment.
 
 ## 📋 Table of Contents
 

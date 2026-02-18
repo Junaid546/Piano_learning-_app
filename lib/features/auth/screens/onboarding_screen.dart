@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/widgets/custom_button.dart';
+import '../providers/auth_provider.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -38,11 +40,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ),
   ];
 
-  Future<void> _completeOnboarding() async {
+  Future<void> _completeOnboarding({bool asGuest = false}) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboardingSeen', true);
-    if (!mounted) return;
-    context.go('/login');
+    
+    if (asGuest) {
+      await ref.read(authProvider.notifier).setGuestMode(true);
+      if (!mounted) return;
+      context.go('/');
+    } else {
+      if (!mounted) return;
+      context.go('/login');
+    }
   }
 
   @override
@@ -54,7 +63,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         elevation: 0,
         actions: [
           TextButton(
-            onPressed: _completeOnboarding,
+            onPressed: () => _completeOnboarding(asGuest: true),
             child: Text(
               'Skip',
               style: AppTextStyles.bodyMedium.copyWith(
@@ -168,36 +177,56 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                   const SizedBox(height: 32),
 
-                  CustomButton(
-                        text: _currentPage == _contents.length - 1
-                            ? 'Get Started'
-                            : 'Next',
-                        onPressed: () {
-                          if (_currentPage == _contents.length - 1) {
-                            _completeOnboarding();
-                          } else {
-                            _pageController.nextPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          }
-                        },
-                        width: double.infinity,
-                      )
-                      .animate(
-                        target: _currentPage == _contents.length - 1 ? 1 : 0,
-                      )
-                      .shimmer(
-                        duration: 2.seconds,
-                        color: Colors.white.withValues(alpha: 0.5),
-                      )
-                      .then() // Wait for shimmer to finish loop? No, pulse is better separate or combined
-                      .animate(onPlay: (c) => c.repeat(reverse: true))
-                      .scaleXY(
-                        end: 1.05,
-                        duration: 1.seconds,
-                        curve: Curves.easeInOut,
-                      ), // Continuous pulse
+                  // On last slide, show both buttons
+                  if (_currentPage == _contents.length - 1)
+                    Column(
+                      children: [
+                        CustomButton(
+                          text: 'Get Started',
+                          onPressed: () => _completeOnboarding(asGuest: false),
+                          width: double.infinity,
+                        ).animate(
+                          target: 1,
+                        ).shimmer(
+                          duration: 2.seconds,
+                          color: Colors.white.withValues(alpha: 0.5),
+                        ).animate(onPlay: (c) => c.repeat(reverse: true))
+                        .scaleXY(
+                          end: 1.05,
+                          duration: 1.seconds,
+                          curve: Curves.easeInOut,
+                        ),
+                        const SizedBox(height: 12),
+                        TextButton(
+                          onPressed: () => _completeOnboarding(asGuest: true),
+                          child: Text(
+                            'Continue as Guest',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.textSecondaryLight,
+                            ),
+                          ),
+                        ).animate().fadeIn(delay: 200.ms),
+                      ],
+                    )
+                  else
+                    CustomButton(
+                      text: 'Next',
+                      onPressed: () {
+                        _pageController.nextPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      width: double.infinity,
+                    ).animate().shimmer(
+                      duration: 2.seconds,
+                      color: Colors.white.withValues(alpha: 0.5),
+                    ).animate(onPlay: (c) => c.repeat(reverse: true))
+                    .scaleXY(
+                      end: 1.05,
+                      duration: 1.seconds,
+                      curve: Curves.easeInOut,
+                    ),
                 ],
               ),
             ),

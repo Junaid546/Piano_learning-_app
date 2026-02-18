@@ -166,7 +166,13 @@ class _PracticeModeScreenState extends ConsumerState<PracticeModeScreen>
                               children: [
                                 IconButton(
                                   icon: const Icon(Icons.close),
-                                  onPressed: () => context.go('/lessons'),
+                                  onPressed: () {
+                                    if (Navigator.canPop(context)) {
+                                      Navigator.pop(context);
+                                    } else {
+                                      context.go('/');
+                                    }
+                                  },
                                   color: isDark ? Colors.white : AppColors.textPrimaryLight,
                                 ),
                                 // Title with difficulty badge
@@ -334,7 +340,17 @@ class _PracticeModeScreenState extends ConsumerState<PracticeModeScreen>
               if (state.showFeedback)
                 Positioned.fill(
                   child: Center(
-                    child: FeedbackOverlay(isCorrect: state.isCorrect),
+                    child: FeedbackOverlay(feedbackType: state.feedbackType),
+                  ),
+                ),
+
+              // Processing Overlay - prevents rapid interaction
+              if (state.isProcessing)
+                Positioned.fill(
+                  child: AbsorbPointer(
+                    child: Container(
+                      color: Colors.transparent,
+                    ),
                   ),
                 ),
               

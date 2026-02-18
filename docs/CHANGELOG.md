@@ -1,4 +1,4 @@
-# PianoApp Changelog
+# Melodify Changelog
 
 All notable changes to this project will be documented in this file.
 
@@ -240,7 +240,7 @@ For questions about releases or to report issues:
 
 ## Acknowledgments
 
-Thank you to all contributors who have helped make PianoApp better!
+Thank you to all contributors who have helped make Melodify better!
 
 <a href="https://github.com/yourusername/pianoapp/graphs/contributors">
   <img src="https://contributors-img.web.app/image?repo=yourusername/pianoapp" />

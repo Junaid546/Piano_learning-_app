@@ -1,9 +1,100 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/models/user_model.dart';
 import '../models/auth_state.dart';
 import '../../../database/sync_service.dart';
+
+/// User-friendly error messages for authentication
+class AuthErrorMessages {
+  static String getReadableError(String errorCode) {
+    switch (errorCode) {
+      // EMAIL ERRORS
+      case 'invalid-email':
+        return 'Please enter a valid email address';
+      case 'user-not-found':
+        return 'No account found with this email. Please sign up first.';
+      case 'email-already-in-use':
+        return 'This email is already registered. Try logging in instead.';
+
+      // PASSWORD ERRORS
+      case 'wrong-password':
+        return 'Incorrect password. Please try again or reset your password.';
+      case 'weak-password':
+        return 'Password is too weak. Use at least 8 characters with letters and numbers.';
+      case 'password-does-not-match':
+        return 'Passwords do not match. Please check and try again.';
+
+      // ACCOUNT ERRORS
+      case 'user-disabled':
+        return 'This account has been disabled. Please contact support.';
+      case 'account-exists-with-different-credential':
+        return 'An account already exists with this email using a different sign-in method.';
+
+      // NETWORK ERRORS
+      case 'network-request-failed':
+        return 'Network error. Please check your internet connection and try again.';
+      case 'too-many-requests':
+        return 'Too many failed attempts. Please wait a few minutes and try again.';
+      case 'operation-not-allowed':
+        return 'This sign-in method is not enabled. Please contact support.';
+
+      // VALIDATION ERRORS
+      case 'email-empty':
+        return 'Please enter your email address';
+      case 'password-empty':
+        return 'Please enter your password';
+      case 'name-empty':
+        return 'Please enter your name';
+      case 'password-too-short':
+        return 'Password must be at least 8 characters long';
+      case 'password-no-uppercase':
+        return 'Password must contain at least one uppercase letter';
+      case 'password-no-lowercase':
+        return 'Password must contain at least one lowercase letter';
+      case 'password-no-number':
+        return 'Password must contain at least one number';
+
+      // TIMEOUT
+      case 'timeout':
+        return 'Request timed out. Please check your connection and try again.';
+
+      // DEFAULT
+      default:
+        return 'Something went wrong. Please try again.';
+    }
+  }
+
+  // Get error with action suggestion
+  static Map<String, String> getErrorWithAction(String errorCode) {
+    String message = getReadableError(errorCode);
+    String? action;
+
+    switch (errorCode) {
+      case 'user-not-found':
+        action = 'Sign Up';
+        break;
+      case 'email-already-in-use':
+        action = 'Login Instead';
+        break;
+      case 'wrong-password':
+        action = 'Forgot Password?';
+        break;
+      case 'network-request-failed':
+        action = 'Retry';
+        break;
+      case 'too-many-requests':
+        action = 'Try Again Later';
+        break;
+    }
+
+    return {
+      'message': message,
+      'action': action ?? 'OK',
+    };
+  }
+}
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier();
@@ -22,9 +113,45 @@ class AuthNotifier extends StateNotifier<AuthState> {
       if (user != null) {
         _fetchUserModel(user);
       } else {
-        state = AuthState.unauthenticated();
+        _checkGuestMode();
       }
     });
+    // Also check guest mode on init
+    _checkGuestMode();
+  }
+
+  Future<void> _checkGuestMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isGuest = prefs.getBool('is_guest_mode') ?? false;
+    if (isGuest) {
+      state = AuthState.guest();
+    } else {
+      state = AuthState.unauthenticated();
+    }
+  }
+
+  /// Check if user is in guest mode
+  Future<bool> get isGuestMode async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('is_guest_mode') ?? false;
+  }
+
+  /// Set guest mode
+  Future<void> setGuestMode(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('is_guest_mode', value);
+    if (value) {
+      state = AuthState.guest();
+    } else {
+      state = AuthState.unauthenticated();
+    }
+  }
+
+  /// Exit guest mode (prompt to sign up)
+  Future<void> exitGuestMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('is_guest_mode');
+    state = AuthState.unauthenticated();
   }
 
   Future<void> _fetchUserModel(User firebaseUser) async {
@@ -110,29 +237,106 @@ class AuthNotifier extends StateNotifier<AuthState> {
     Future.microtask(() => syncService.syncAllData(userId));
   }
 
-  Future<void> login(String email, String password) async {
+  Future<bool> login(String email, String password) async {
+    // Validation
+    if (email.trim().isEmpty) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: AuthErrorMessages.getReadableError('email-empty'),
+      );
+      return false;
+    }
+
+    if (password.isEmpty) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: AuthErrorMessages.getReadableError('password-empty'),
+      );
+      return false;
+    }
+
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
-      // Auth state listener will handle the rest
+      return true;
     } on FirebaseAuthException catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: _handleAuthException(e),
+        errorMessage: AuthErrorMessages.getReadableError(e.code),
       );
+      return false;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: 'An unexpected error occurred',
+        errorMessage: 'Unable to sign in. Please check your credentials and try again.',
       );
+      return false;
     }
   }
 
-  Future<void> signup({
+  Future<bool> signup({
     required String email,
     required String password,
     required String fullName,
   }) async {
+    // Validation
+    if (fullName.trim().isEmpty) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: AuthErrorMessages.getReadableError('name-empty'),
+      );
+      return false;
+    }
+
+    if (email.trim().isEmpty) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: AuthErrorMessages.getReadableError('email-empty'),
+      );
+      return false;
+    }
+
+    if (password.isEmpty) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: AuthErrorMessages.getReadableError('password-empty'),
+      );
+      return false;
+    }
+
+    // Password strength validation
+    if (password.length < 8) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: AuthErrorMessages.getReadableError('password-too-short'),
+      );
+      return false;
+    }
+
+    if (!password.contains(RegExp(r'[A-Z]'))) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: AuthErrorMessages.getReadableError('password-no-uppercase'),
+      );
+      return false;
+    }
+
+    if (!password.contains(RegExp(r'[a-z]'))) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: AuthErrorMessages.getReadableError('password-no-lowercase'),
+      );
+      return false;
+    }
+
+    if (!password.contains(RegExp(r'[0-9]'))) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: AuthErrorMessages.getReadableError('password-no-number'),
+      );
+      return false;
+    }
+
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       final UserCredential cred = await _auth.createUserWithEmailAndPassword(
@@ -173,19 +377,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
           'practiceDates': {},
         });
 
-        // Auth state listener will pick up the change, but model might take a moment
         state = AuthState.authenticated(cred.user!, newUser);
+        return true;
       }
+      return false;
     } on FirebaseAuthException catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: _handleAuthException(e),
+        errorMessage: AuthErrorMessages.getReadableError(e.code),
       );
+      return false;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: 'An unexpected error occurred',
+        errorMessage: 'An unexpected error occurred. Please try again.',
       );
+      return false;
     }
   }
 
@@ -208,6 +415,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> resetPassword(String email) async {
+    if (email.trim().isEmpty) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: AuthErrorMessages.getReadableError('email-empty'),
+      );
+      return;
+    }
+
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       await _auth.sendPasswordResetEmail(email: email);
@@ -215,29 +430,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } on FirebaseAuthException catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: _handleAuthException(e),
+        errorMessage: AuthErrorMessages.getReadableError(e.code),
       );
     }
   }
 
   void clearError() {
     state = state.copyWith(errorMessage: null);
-  }
-
-  String _handleAuthException(FirebaseAuthException e) {
-    switch (e.code) {
-      case 'user-not-found':
-        return 'No user found for that email.';
-      case 'wrong-password':
-        return 'Wrong password provided.';
-      case 'email-already-in-use':
-        return 'The account already exists for that email.';
-      case 'weak-password':
-        return 'The password provided is too weak.';
-      case 'invalid-email':
-        return 'The email address is not valid.';
-      default:
-        return e.message ?? 'Authentication failed.';
-    }
   }
 }

@@ -90,6 +90,11 @@ class OctaveRange {
     return '${firstKey.fullName}-${lastKey.fullName}';
   }
 
+  /// Get short display string for small screens (e.g., "3-4")
+  String get shortDisplayString {
+    return '${whiteKeys.first.octave}-${whiteKeys.last.octave}';
+  }
+
   /// Get number of octaves in this range
   int get numOctaves => endOctave - startOctave + 1;
 

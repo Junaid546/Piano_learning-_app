@@ -44,6 +44,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final authState = ref.read(authProvider);
       final isLoggedIn = authState.isAuthenticated;
+      final isGuest = authState.isGuest;
       final location = state.matchedLocation;
 
       // Allow splash and onboarding to handle their own navigation
@@ -51,14 +52,15 @@ final routerProvider = Provider<GoRouter>((ref) {
         return null;
       }
 
-      // Redirect to login if not authenticated (except for auth screens)
-      if (!isLoggedIn && !_isAuthRoute(location)) {
-        return '/login';
-      }
-
-      // Redirect to home if already authenticated and trying to access auth screens
+      // If logged in (but not guest), don't show auth pages
+      // Guests can access signup to upgrade their account
       if (isLoggedIn && _isAuthRoute(location)) {
         return '/';
+      }
+
+      // If not logged in and not guest, redirect to onboarding
+      if (!isLoggedIn && !isGuest && !_isAuthRoute(location)) {
+        return '/onboarding';
       }
 
       return null;

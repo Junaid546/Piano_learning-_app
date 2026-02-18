@@ -265,13 +265,16 @@ class _WhiteKeyWidgetState extends State<_WhiteKeyWidget>
               ? Align(
                   alignment: Alignment.bottomCenter,
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      widget.pianoKey.note,
-                      style: TextStyle(
-                        color: widget.isPressed ? Colors.white : Colors.black54,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                    padding: EdgeInsets.only(bottom: widget.width < 45 ? 4 : 8),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        widget.pianoKey.note,
+                        style: TextStyle(
+                          color: widget.isPressed ? Colors.white : Colors.black54,
+                          fontSize: widget.width < 45 ? 10 : 12,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
@@ -386,12 +389,15 @@ class _BlackKeyWidgetState extends State<_BlackKeyWidget>
           ),
           child: widget.showLabel
               ? Center(
-                  child: Text(
-                    widget.pianoKey.note,
-                    style: TextStyle(
-                      color: widget.isPressed ? Colors.black : Colors.white70,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      widget.pianoKey.note,
+                      style: TextStyle(
+                        color: widget.isPressed ? Colors.black : Colors.white70,
+                        fontSize: widget.width < 30 ? 7 : 10,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 )

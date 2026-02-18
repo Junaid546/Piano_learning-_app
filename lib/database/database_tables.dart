@@ -2,7 +2,7 @@
 /// Each table mirrors a Firestore collection/model
 class DatabaseTables {
   // Database name and version
-  static const String databaseName = 'pianoapp_cache.db';
+  static const String databaseName = 'melodify_cache.db';
   static const int databaseVersion = 3;
 
   // Table names

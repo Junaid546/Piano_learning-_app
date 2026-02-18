@@ -6,12 +6,14 @@ class AuthState {
   final UserModel? userModel;
   final bool isLoading;
   final String? errorMessage;
+  final bool isGuest;
 
   const AuthState({
     this.firebaseUser,
     this.userModel,
     this.isLoading = false,
     this.errorMessage,
+    this.isGuest = false,
   });
 
   bool get isAuthenticated => firebaseUser != null;
@@ -36,17 +38,23 @@ class AuthState {
     return const AuthState();
   }
 
+  factory AuthState.guest() {
+    return const AuthState(isGuest: true);
+  }
+
   AuthState copyWith({
     User? firebaseUser,
     UserModel? userModel,
     bool? isLoading,
     String? errorMessage,
+    bool? isGuest,
   }) {
     return AuthState(
       firebaseUser: firebaseUser ?? this.firebaseUser,
       userModel: userModel ?? this.userModel,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage ?? this.errorMessage,
+      isGuest: isGuest ?? this.isGuest,
     );
   }
 }

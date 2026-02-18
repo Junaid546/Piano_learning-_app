@@ -1,6 +1,6 @@
-# PianoApp - Future Enhancements
+# Melodify - Future Enhancements
 
-This document outlines planned features, improvements, and enhancements for PianoApp.
+This document outlines planned features, improvements, and enhancements for Melodify.
 
 ## 📋 Table of Contents
 
@@ -505,7 +505,7 @@ For questions or suggestions:
 
 Thank you to everyone who has contributed ideas and feedback!
 
-Your suggestions help make PianoApp better for everyone.
+Your suggestions help make Melodify better for everyone.
 
 ---
 
@@ -513,6 +513,6 @@ Your suggestions help make PianoApp better for everyone.
 
 **Want to contribute?** Check out our [Contributing Guide](CONTRIBUTING.md)
 
-Made with ❤️ by the PianoApp Team
+Made with ❤️ by the Melodify Team
 
 </div>
