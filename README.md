@@ -652,19 +652,30 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- [Flutter](https://flutter.dev/) - UI framework
-- [Riverpod](https://riverpod.dev/) - State management
-- [Firebase](https://firebase.google.com/) - Backend services
-- [audioplayers](https://pub.dev/packages/audioplayers) - Audio playback
-- [go_router](https://pub.dev/packages/go_router) - Navigation
+### Development
+- **Lead Developer**: Junaid Tahir
+- **UI/UX Design**: Junaid Tahir
+
+
+### Open Source Libraries
+
+| Library | Version | License |
+|---------|---------|---------|
+| flutter_riverpod | 2.4.0 | MIT |
+| firebase_core | 2.24.0 | Apache 2.0 |
+| audioplayers | 5.2.1 | MIT |
+| go_router | 13.0.0 | MIT |
+| fl_chart | 0.66.0 | MIT |
 
 ---
 
 ## 📞 Support
 
-For questions about releases or to report issues:
-- Create an [Issue](https://github.com/yourusername/melodify/issues)
-- Email: support@melodify.com
+If you have any questions or need help, please:
+
+1. Check the [Documentation](docs/)
+2. Open an [Issue](https://github.com/Junaid546/Piano_learning-_app/issues)
+3. Email: junaidt950@gmail.com
 
 ---
 
