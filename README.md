@@ -45,7 +45,6 @@ Melodify is designed to help users learn piano in an interactive and gamified wa
 | **Level System** | Complete lessons to level up |
 | **Points & Rewards** | Earn points for correct notes |
 | **Streak Counter** | Track daily practice streaks |
-| **Leaderboards** | Compete with other learners |
 
 ### User Features
 | Feature | Description |
