@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/app.dart';
 import 'services/firebase_service.dart';
 import 'database/database_helper.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import 'features/piano/providers/audio_service_provider.dart';
 
 /// Main entry point for the Melodify application.
@@ -20,6 +22,9 @@ void main() async {
   // Ensure Flutter binding is initialized before async operations
   // This is required for plugins that use platform channels
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
 
   // Step 1: Initialize SQLite database for local data persistence
   // This stores lesson progress, practice sessions, and user preferences
